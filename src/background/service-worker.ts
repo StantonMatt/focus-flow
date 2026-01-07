@@ -12,7 +12,7 @@ import {
   getTodayString
 } from '../shared/storage';
 import { 
-  findMatchingBlockedSite, 
+  findMatchingBlockedSiteInCategories, 
   isAnyScheduleActive, 
   extractDomain 
 } from '../shared/utils';
@@ -174,7 +174,9 @@ async function checkIfBlocked(url: string): Promise<CheckBlockedResponse> {
   }
   
   const domain = extractDomain(url);
-  const matchingSite = findMatchingBlockedSite(url, settings.blockedSites);
+  
+  // Find matching site across all enabled categories
+  const matchingSite = findMatchingBlockedSiteInCategories(url, settings.siteCategories);
   
   if (!matchingSite) {
     return { isBlocked: false };

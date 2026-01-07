@@ -2,17 +2,87 @@ import type {
   Settings, 
   DailyTimeStats, 
   PomodoroState, 
-  ActiveBypass 
+  ActiveBypass,
+  BlockedSite,
+  SiteCategory,
+  ContentFilters
 } from './types';
 import { 
   DEFAULT_SETTINGS, 
+  DEFAULT_CATEGORIES,
+  DEFAULT_CONTENT_FILTERS,
   STORAGE_KEYS 
 } from './constants';
+
+// Migrate old settings to new structure
+function migrateSettings(oldSettings: Record<string, unknown>): Settings {
+  const settings: Settings = { ...DEFAULT_SETTINGS, ...oldSettings as Partial<Settings> };
+  
+  // Migration 1: blockedSites array to siteCategories
+  if (!oldSettings.siteCategories && oldSettings.blockedSites) {
+    const oldBlockedSites = oldSettings.blockedSites as BlockedSite[];
+    const categories: SiteCategory[] = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    
+    if (oldBlockedSites.length > 0) {
+      const customCategory: SiteCategory = {
+        id: 'user-custom',
+        name: 'My Sites',
+        nameKey: 'categories.custom',
+        icon: '⭐',
+        enabled: true,
+        isCustom: true,
+        sites: oldBlockedSites.filter(site => site.pattern !== 'youtube.com/shorts'),
+      };
+      
+      if (customCategory.sites.length > 0) {
+        categories.push(customCategory);
+      }
+    }
+    
+    settings.siteCategories = categories;
+  }
+  
+  // Migration 2: blockYouTubeShorts to contentFilters.youtubeShorts
+  if (!oldSettings.contentFilters) {
+    const contentFilters: ContentFilters = { ...DEFAULT_CONTENT_FILTERS };
+    
+    // Migrate blockYouTubeShorts if it exists
+    if (typeof oldSettings.blockYouTubeShorts === 'boolean') {
+      contentFilters.youtubeShorts = oldSettings.blockYouTubeShorts;
+    }
+    
+    settings.contentFilters = contentFilters;
+  }
+  
+  // Clean up legacy fields
+  settings.blockedSites = undefined;
+  settings.blockYouTubeShorts = undefined;
+  
+  return settings;
+}
 
 // Get settings from storage
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.sync.get(STORAGE_KEYS.SETTINGS);
-  return (result[STORAGE_KEYS.SETTINGS] as Settings | undefined) ?? DEFAULT_SETTINGS;
+  const storedSettings = result[STORAGE_KEYS.SETTINGS] as Record<string, unknown> | undefined;
+  
+  if (!storedSettings) {
+    return DEFAULT_SETTINGS;
+  }
+  
+  // Check if migration is needed
+  const needsMigration = !storedSettings.siteCategories || 
+                         !storedSettings.contentFilters ||
+                         typeof storedSettings.blockYouTubeShorts === 'boolean';
+  
+  const migratedSettings = migrateSettings(storedSettings);
+  
+  // If settings were migrated, save them back
+  if (needsMigration) {
+    await saveSettings(migratedSettings);
+  }
+  
+  return migratedSettings;
 }
 
 // Save settings to storage

@@ -1,8 +1,19 @@
-import type { CheckBlockedResponse, Message } from '../shared/types';
+import type { CheckBlockedResponse, Message, Settings } from '../shared/types';
 import { extractDomain, formatDuration } from '../shared/utils';
 import { HEARTBEAT_INTERVAL } from '../shared/constants';
 import { getTranslator } from '../shared/i18n';
-import { initYouTubeShortsBlocking, isYouTube } from './youtube';
+import { initFilters } from './filters';
+
+// Import filter registrations (they auto-register on import)
+import './filters/youtube';
+import './filters/instagram';
+import './filters/facebook';
+import './filters/twitter';
+import './filters/reddit';
+import './filters/tiktok';
+import './filters/twitch';
+import './filters/linkedin';
+import './filters/snapchat';
 
 // Track state
 let isInitialized = false;
@@ -82,6 +93,12 @@ function waitForBody(): Promise<void> {
 // Initialize content script
 async function init() {
   if (isInitialized) return;
+  
+  // Skip non-http pages (about:blank, chrome://, etc.)
+  if (!window.location.href.startsWith('http')) {
+    return;
+  }
+  
   isInitialized = true;
   
   // Wait for body to exist before doing anything
@@ -101,9 +118,15 @@ async function init() {
   // Check if current page should be blocked FIRST
   await checkAndBlock();
   
-  // Initialize YouTube Shorts blocking if on YouTube (only if not blocked)
-  if (!isBlocked && !isFrictionActive && isYouTube()) {
-    initYouTubeShortsBlocking();
+  // Initialize content filters (YouTube Shorts, Instagram Reels, etc.)
+  if (!isBlocked && !isFrictionActive) {
+    const settings = await sendMessage<Settings>({
+      type: 'GET_SETTINGS',
+    });
+    
+    if (settings?.contentFilters) {
+      initFilters(settings.contentFilters, window.location.href);
+    }
   }
   
   // Start time tracking
@@ -113,8 +136,8 @@ async function init() {
   document.addEventListener('visibilitychange', handleVisibilityChange);
   
   // Clear bypass when page is closed (user consciously leaves the site)
+  // Note: Using only pagehide as beforeunload causes permissions policy violations
   window.addEventListener('pagehide', handlePageHide);
-  window.addEventListener('beforeunload', handleBeforeUnload);
 }
 
 // Check if the current page should be blocked
@@ -540,9 +563,13 @@ async function initFrictionLogic(overlay: HTMLElement) {
     bypassedDomain = domain; // Track that we bypassed friction for this domain
     overlay.remove();
     
-    // Now initialize YouTube shorts blocking if needed
-    if (isYouTube()) {
-      initYouTubeShortsBlocking();
+    // Now initialize content filters if needed
+    const settings = await sendMessage<Settings>({
+      type: 'GET_SETTINGS',
+    });
+    
+    if (settings?.contentFilters) {
+      initFilters(settings.contentFilters, window.location.href);
     }
   }
 }
@@ -596,13 +623,6 @@ function handleVisibilityChange() {
 function handlePageHide(event: PageTransitionEvent) {
   // Only clear bypass if not being cached (actual navigation/close)
   if (!event.persisted && bypassedDomain) {
-    clearBypass();
-  }
-}
-
-function handleBeforeUnload() {
-  // Clear bypass when page is about to be unloaded
-  if (bypassedDomain) {
     clearBypass();
   }
 }

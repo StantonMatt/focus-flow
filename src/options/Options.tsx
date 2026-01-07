@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import type { Settings, Language } from '../shared/types';
 import { useTranslation } from '../shared/i18n';
 import BlockedSitesSection from './components/BlockedSitesSection';
+import ContentFiltersSection from './components/ContentFiltersSection';
 import SchedulesSection from './components/SchedulesSection';
 import FrictionSection from './components/FrictionSection';
 import PomodoroSection from './components/PomodoroSection';
 import TimeStatsSection from './components/TimeStatsSection';
 
-type Tab = 'blocked' | 'schedules' | 'friction' | 'pomodoro' | 'stats';
+type Tab = 'blocked' | 'filters' | 'schedules' | 'friction' | 'pomodoro' | 'stats';
 
 export default function Options() {
   const { t, language, setLanguage } = useTranslation();
@@ -67,6 +68,11 @@ export default function Options() {
       id: 'blocked', 
       label: t('blockedSites.title'),
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+    },
+    { 
+      id: 'filters', 
+      label: t('contentFilters.tabTitle'),
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
     },
     { 
       id: 'schedules', 
@@ -157,8 +163,15 @@ export default function Options() {
         <div className="options-content">
           {activeTab === 'blocked' && (
             <BlockedSitesSection 
-              sites={settings.blockedSites}
-              onUpdate={(sites) => saveSettings({ ...settings, blockedSites: sites })}
+              categories={settings.siteCategories}
+              onUpdate={(categories) => saveSettings({ ...settings, siteCategories: categories })}
+            />
+          )}
+          
+          {activeTab === 'filters' && (
+            <ContentFiltersSection
+              filters={settings.contentFilters}
+              onUpdate={(filters) => saveSettings({ ...settings, contentFilters: filters })}
             />
           )}
           

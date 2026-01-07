@@ -1,4 +1,4 @@
-import type { BlockedSite, Schedule } from './types';
+import type { BlockedSite, Schedule, SiteCategory } from './types';
 
 // Extract domain from URL
 export function extractDomain(url: string): string {
@@ -57,7 +57,7 @@ export function isAnyScheduleActive(schedules: Schedule[]): boolean {
   return schedules.some(isWithinSchedule);
 }
 
-// Find matching blocked site for a URL
+// Find matching blocked site for a URL (legacy - for flat array)
 export function findMatchingBlockedSite(
   url: string, 
   blockedSites: BlockedSite[]
@@ -65,6 +65,28 @@ export function findMatchingBlockedSite(
   return blockedSites.find(site => 
     site.enabled && matchesPattern(url, site.pattern)
   );
+}
+
+// Find matching blocked site across all categories
+export function findMatchingBlockedSiteInCategories(
+  url: string,
+  categories: SiteCategory[]
+): BlockedSite | undefined {
+  for (const category of categories) {
+    // Skip disabled categories
+    if (!category.enabled) continue;
+    
+    // Search sites within the category
+    const matchingSite = category.sites.find(site => 
+      site.enabled && matchesPattern(url, site.pattern)
+    );
+    
+    if (matchingSite) {
+      return matchingSite;
+    }
+  }
+  
+  return undefined;
 }
 
 // Format seconds as MM:SS

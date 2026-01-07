@@ -10,6 +10,18 @@ export interface BlockedSite {
   enabled: boolean;
 }
 
+// Category of blocked sites
+export interface SiteCategory {
+  id: string;
+  name: string;              // Display name (e.g., "Social Media")
+  nameKey?: string;          // i18n key for translation (e.g., "categories.socialMedia")
+  icon: string;              // Emoji for category
+  enabled: boolean;          // Toggle entire category
+  sites: BlockedSite[];
+  isCustom: boolean;         // User-created category
+  collapsed?: boolean;       // UI state for collapsible cards
+}
+
 // Schedule for time-based blocking
 export interface Schedule {
   id: string;
@@ -66,14 +78,43 @@ export interface DailyTimeStats {
 // Supported languages
 export type Language = 'auto' | 'en' | 'es' | 'zh-CN' | 'pt-BR';
 
+// Content filter types for partial blocking
+export interface ContentFilters {
+  // YouTube
+  youtubeShorts: boolean;
+  youtubeRecommendations: boolean;
+  youtubeComments: boolean;
+  // Instagram
+  instagramReels: boolean;
+  instagramStories: boolean;
+  // Facebook
+  facebookReels: boolean;
+  facebookStories: boolean;
+  // Twitter/X
+  twitterForYou: boolean;
+  twitterExplore: boolean;
+  // Reddit
+  redditPopular: boolean;
+  redditComments: boolean;
+  // Other platforms
+  tiktokForYou: boolean;
+  twitchRecommended: boolean;
+  linkedinFeed: boolean;
+  snapchatStories: boolean;
+}
+
 // Main settings object
 export interface Settings {
   enabled: boolean;
-  blockedSites: BlockedSite[];
+  siteCategories: SiteCategory[];  // Categorized blocked sites
+  contentFilters: ContentFilters;  // Partial content blocking
   schedules: Schedule[];
   friction: FrictionSettings;
   pomodoro: PomodoroSettings;
   language: Language;
+  // Legacy fields for migration (will be removed after migration)
+  blockedSites?: BlockedSite[];
+  blockYouTubeShorts?: boolean;    // Migrated to contentFilters.youtubeShorts
 }
 
 // Messages between content scripts and service worker
