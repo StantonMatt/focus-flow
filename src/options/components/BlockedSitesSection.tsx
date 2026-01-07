@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { BlockedSite, BlockMode } from '../../shared/types';
 import { generateId } from '../../shared/utils';
+import { useTranslation } from '../../shared/i18n';
 
 interface Props {
   sites: BlockedSite[];
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function BlockedSitesSection({ sites, onUpdate }: Props) {
+  const { t } = useTranslation();
   const [newPattern, setNewPattern] = useState('');
   const [newMode, setNewMode] = useState<BlockMode>('block');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -56,9 +58,9 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
   
   const getModeLabel = (mode: BlockMode) => {
     switch (mode) {
-      case 'block': return 'Block';
-      case 'friction': return 'Friction';
-      case 'time-limit': return 'Time Limit';
+      case 'block': return t('blockedSites.modeBlock');
+      case 'friction': return t('blockedSites.modeFriction');
+      case 'time-limit': return t('blockedSites.modeTimeLimit');
     }
   };
   
@@ -70,14 +72,21 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
     }
   };
   
+  const getSitesCountText = () => {
+    if (sites.length === 1) {
+      return t('blockedSites.sitesCount', { count: 1 });
+    }
+    return t('blockedSites.sitesCountPlural', { count: sites.length });
+  };
+  
   return (
     <div>
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Add Blocked Site</h2>
+            <h2 className="settings-section-title">{t('blockedSites.addTitle')}</h2>
             <p className="settings-section-desc">
-              Enter a domain or URL pattern to block (e.g., youtube.com/shorts, x.com)
+              {t('blockedSites.addDesc')}
             </p>
           </div>
         </div>
@@ -87,7 +96,7 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
             <input
               type="text"
               className="form-input"
-              placeholder="example.com or example.com/path"
+              placeholder={t('blockedSites.placeholder')}
               value={newPattern}
               onChange={(e) => setNewPattern(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -100,14 +109,14 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
               value={newMode}
               onChange={(e) => setNewMode(e.target.value as BlockMode)}
             >
-              <option value="block">Block</option>
-              <option value="friction">Friction</option>
-              <option value="time-limit">Time Limit</option>
+              <option value="block">{t('blockedSites.modeBlock')}</option>
+              <option value="friction">{t('blockedSites.modeFriction')}</option>
+              <option value="time-limit">{t('blockedSites.modeTimeLimit')}</option>
             </select>
           </div>
           
           <button className="btn btn-primary" onClick={handleAdd}>
-            Add Site
+            {t('blockedSites.addButton')}
           </button>
         </div>
       </div>
@@ -115,9 +124,9 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Blocked Sites</h2>
+            <h2 className="settings-section-title">{t('blockedSites.title')}</h2>
             <p className="settings-section-desc">
-              {sites.length} site{sites.length !== 1 ? 's' : ''} in your blocklist
+              {getSitesCountText()}
             </p>
           </div>
         </div>
@@ -125,9 +134,9 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
         {sites.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">🚫</div>
-            <p className="empty-state-title">No blocked sites yet</p>
+            <p className="empty-state-title">{t('blockedSites.noSitesYet')}</p>
             <p className="empty-state-text">
-              Add your first site above to start blocking distractions
+              {t('blockedSites.addFirstSite')}
             </p>
           </div>
         ) : (
@@ -153,7 +162,7 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
                     </span>
                     {site.mode === 'time-limit' && site.dailyLimitMinutes && (
                       <span className="limit-text">
-                        {site.dailyLimitMinutes} min/day
+                        {site.dailyLimitMinutes} {t('common.minPerDay')}
                       </span>
                     )}
                   </div>
@@ -166,9 +175,9 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
                       value={site.mode}
                       onChange={(e) => handleUpdateMode(site.id, e.target.value as BlockMode)}
                     >
-                      <option value="block">Block</option>
-                      <option value="friction">Friction</option>
-                      <option value="time-limit">Time Limit</option>
+                      <option value="block">{t('blockedSites.modeBlock')}</option>
+                      <option value="friction">{t('blockedSites.modeFriction')}</option>
+                      <option value="time-limit">{t('blockedSites.modeTimeLimit')}</option>
                     </select>
                     
                     {site.mode === 'time-limit' && (
@@ -186,7 +195,7 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
                       className="btn btn-sm btn-primary"
                       onClick={() => setEditingId(null)}
                     >
-                      Done
+                      {t('common.done')}
                     </button>
                   </div>
                 ) : (
@@ -194,7 +203,7 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
                     <button 
                       className="btn-icon-sm"
                       onClick={() => setEditingId(site.id)}
-                      title="Edit"
+                      title={t('common.edit')}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -204,7 +213,7 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
                     <button 
                       className="btn-icon-sm danger"
                       onClick={() => handleDelete(site.id)}
-                      title="Delete"
+                      title={t('common.delete')}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -242,4 +251,3 @@ export default function BlockedSitesSection({ sites, onUpdate }: Props) {
     </div>
   );
 }
-

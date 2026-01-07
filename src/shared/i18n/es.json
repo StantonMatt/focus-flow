@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "add": "Agregar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "done": "Listo",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "active": "Activo",
+    "off": "Apagado",
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "settings": "Configuración",
+    "today": "Hoy",
+    "total": "Total",
+    "minutes": "min",
+    "seconds": "s",
+    "sessions": "sesiones",
+    "minPerDay": "min/día",
+    "extension": "Extensión"
+  },
+  "popup": {
+    "timer": "Temporizador",
+    "stats": "Estadísticas",
+    "pomodoros": "Pomodoros",
+    "status": "Estado",
+    "disableBlocking": "Desactivar bloqueo",
+    "enableBlocking": "Activar bloqueo"
+  },
+  "pomodoro": {
+    "focusTime": "Tiempo de Enfoque",
+    "shortBreak": "Descanso Corto",
+    "longBreak": "Descanso Largo",
+    "readyToFocus": "Listo para Enfocarse",
+    "session": "Sesión",
+    "start": "Iniciar",
+    "resume": "Continuar",
+    "pause": "Pausar",
+    "skipToNext": "Saltar a la siguiente fase",
+    "resetTimer": "Reiniciar temporizador",
+    "work": "Trabajo",
+    "break": "Descanso",
+    "workComplete": "¡Sesión de Trabajo Completada!",
+    "workCompleteBody": "Es hora de un descanso. ¡Buen trabajo manteniéndote enfocado!",
+    "breakComplete": "¡Descanso Terminado!",
+    "breakCompleteBody": "¿Listo para volver al trabajo?"
+  },
+  "stats": {
+    "todaysActivity": "Actividad de Hoy",
+    "noActivityYet": "Sin actividad aún",
+    "startBrowsing": "Comienza a navegar y tu tiempo será registrado aquí.",
+    "weeklyOverview": "Resumen Semanal",
+    "weeklyDesc": "Tu tiempo de navegación en los últimos 7 días",
+    "noDataForDay": "Sin datos para este día",
+    "browseToSee": "Navega por algunos sitios web para ver tus datos de tiempo"
+  },
+  "blockedSites": {
+    "title": "Sitios Bloqueados",
+    "addTitle": "Agregar Sitio Bloqueado",
+    "addDesc": "Ingresa un dominio o patrón de URL para bloquear (ej., youtube.com/shorts, x.com)",
+    "placeholder": "ejemplo.com o ejemplo.com/ruta",
+    "addButton": "Agregar Sitio",
+    "sitesCount": "{count} sitio en tu lista de bloqueo",
+    "sitesCountPlural": "{count} sitios en tu lista de bloqueo",
+    "noSitesYet": "Sin sitios bloqueados aún",
+    "addFirstSite": "Agrega tu primer sitio arriba para comenzar a bloquear distracciones",
+    "modeBlock": "Bloquear",
+    "modeFriction": "Fricción",
+    "modeTimeLimit": "Límite de Tiempo"
+  },
+  "schedules": {
+    "title": "Horarios de Bloqueo",
+    "description": "Los sitios solo se bloquean durante los horarios activos",
+    "addSchedule": "Agregar Horario",
+    "scheduleName": "Nombre del Horario",
+    "scheduleNamePlaceholder": "ej., Horas de Trabajo, Tiempo de Estudio",
+    "days": "Días",
+    "startTime": "Hora de Inicio",
+    "endTime": "Hora de Fin",
+    "updateSchedule": "Actualizar Horario",
+    "noSchedulesYet": "Sin horarios aún",
+    "noSchedulesDesc": "Sin horarios, el bloqueo está siempre activo. Agrega un horario para limitar el bloqueo a momentos específicos.",
+    "everyDay": "Todos los días",
+    "weekdays": "Días de semana",
+    "weekends": "Fines de semana"
+  },
+  "friction": {
+    "title": "Fricción",
+    "description": "Configura el retraso y requisitos para acceder a sitios en modo fricción",
+    "preview": "Vista Previa",
+    "previewIntro": "Al visitar un sitio con fricción activada:",
+    "previewWait": "Esperar {seconds} segundos",
+    "previewType": "Escribir: \"{phrase}\"",
+    "previewAccess": "Acceso otorgado por {minutes} minutos",
+    "delayDuration": "Duración del Retraso (segundos)",
+    "requirePhrase": "Requerir escribir una frase",
+    "phraseToType": "Frase a Escribir",
+    "phrasePlaceholder": "ej., Quiero procrastinar",
+    "phraseHint": "Los usuarios deben escribir esta frase exactamente para acceder al sitio",
+    "bypassDuration": "Duración del Acceso (minutos)",
+    "bypassHint": "Después de completar la fricción, el acceso se otorga por esta duración"
+  },
+  "pomodoroSettings": {
+    "tabTitle": "Pomodoro",
+    "durationsTitle": "Duración del Temporizador",
+    "durationsDesc": "Personaliza tus intervalos de enfoque y descanso",
+    "behaviorTitle": "Comportamiento",
+    "behaviorDesc": "Personaliza cómo se comporta el temporizador",
+    "shortBreak": "Descanso Corto",
+    "longBreak": "Descanso Largo",
+    "sessionsUntilLong": "Sesiones hasta descanso largo",
+    "autoStartBreaks": "Iniciar descansos automáticamente",
+    "autoStartBreaksDesc": "Iniciar automáticamente el temporizador de descanso cuando termina la sesión de trabajo",
+    "autoStartWork": "Iniciar sesiones de trabajo automáticamente",
+    "autoStartWorkDesc": "Iniciar automáticamente el temporizador de trabajo cuando termina el descanso",
+    "blockDuringWork": "Bloquear durante sesiones de trabajo",
+    "blockDuringWorkDesc": "Activar bloqueo estricto durante el tiempo de enfoque",
+    "notifications": "Notificaciones de escritorio",
+    "notificationsDesc": "Mostrar notificaciones cuando terminan las sesiones"
+  },
+  "blocked": {
+    "stayFocused": "Mantente Enfocado",
+    "siteBlocked": "{site} está bloqueado",
+    "thisIsBlocked": "Este sitio está bloqueado",
+    "dailyLimitReached": "Límite de tiempo diario alcanzado",
+    "breathe": "Toma un momento para respirar",
+    "breatheIn": "Inhala...",
+    "hold": "Mantén...",
+    "breatheOut": "Exhala...",
+    "goBack": "Volver"
+  },
+  "frictionOverlay": {
+    "wait": "Espera un momento...",
+    "almostThere": "Casi listo...",
+    "typePhrase": "Escribe esta frase para continuar:",
+    "continue": "Continuar al Sitio",
+    "returnToSafety": "Volver a la Seguridad"
+  },
+  "timeLimitWidget": {
+    "timeRemaining": "Tiempo restante",
+    "hideWidget": "Ocultar widget"
+  },
+  "language": {
+    "title": "Idioma",
+    "auto": "Auto (Navegador)",
+    "en": "English",
+    "es": "Español",
+    "zh-CN": "简体中文",
+    "pt-BR": "Português (BR)"
+  },
+  "days": {
+    "sun": "Dom",
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mié",
+    "thu": "Jue",
+    "fri": "Vie",
+    "sat": "Sáb"
+  },
+  "quotes": [
+    {
+      "text": "El secreto para avanzar es comenzar.",
+      "author": "Mark Twain"
+    },
+    {
+      "text": "Concéntrate en ser productivo en lugar de estar ocupado.",
+      "author": "Tim Ferriss"
+    },
+    {
+      "text": "No es que sea tan inteligente, es que me quedo con los problemas más tiempo.",
+      "author": "Albert Einstein"
+    },
+    {
+      "text": "La forma de empezar es dejar de hablar y empezar a hacer.",
+      "author": "Walt Disney"
+    },
+    {
+      "text": "No mires el reloj; haz lo que él hace. Sigue adelante.",
+      "author": "Sam Levenson"
+    },
+    {
+      "text": "Tu futuro se crea por lo que haces hoy, no mañana.",
+      "author": "Robert Kiyosaki"
+    },
+    {
+      "text": "La única forma de hacer un gran trabajo es amar lo que haces.",
+      "author": "Steve Jobs"
+    },
+    {
+      "text": "El éxito no es definitivo, el fracaso no es fatal: lo que cuenta es el coraje para continuar.",
+      "author": "Winston Churchill"
+    }
+  ]
+}
+

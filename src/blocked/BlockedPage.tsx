@@ -1,22 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../shared/i18n';
 import './BlockedPage.css';
 
-// Motivational quotes
-const quotes = [
-  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
-  { text: "It's not that I'm so smart, it's just that I stay with problems longer.", author: "Albert Einstein" },
-  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-  { text: "Your future is created by what you do today, not tomorrow.", author: "Robert Kiyosaki" },
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-];
-
 export default function BlockedPage() {
+  const { t, getQuotes } = useTranslation();
   const [blockedUrl, setBlockedUrl] = useState('');
   const [message, setMessage] = useState('');
-  const [quote, setQuote] = useState(quotes[0]);
+  const [quote, setQuote] = useState<{ text: string; author: string } | null>(null);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   
   useEffect(() => {
@@ -39,8 +29,11 @@ export default function BlockedPage() {
       setMessage(decodeURIComponent(msg));
     }
     
-    // Random quote
-    setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    // Random quote from translations
+    const quotes = getQuotes();
+    if (quotes.length > 0) {
+      setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    }
     
     // Breathing animation cycle
     const breathingCycle = () => {
@@ -53,7 +46,7 @@ export default function BlockedPage() {
     const interval = setInterval(breathingCycle, 11000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [getQuotes]);
   
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -67,6 +60,31 @@ export default function BlockedPage() {
     chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, () => {
       chrome.tabs.create({ url: chrome.runtime.getURL('src/options/index.html') });
     });
+  };
+  
+  const getBreathingText = () => {
+    switch (breathingPhase) {
+      case 'inhale':
+        return t('blocked.breatheIn');
+      case 'hold':
+        return t('blocked.hold');
+      case 'exhale':
+        return t('blocked.breatheOut');
+    }
+  };
+  
+  const getBlockedMessage = () => {
+    if (message) {
+      // Check if it's a known message key
+      if (message === 'Daily time limit reached') {
+        return t('blocked.dailyLimitReached');
+      }
+      return message;
+    }
+    if (blockedUrl) {
+      return t('blocked.siteBlocked', { site: blockedUrl });
+    }
+    return t('blocked.thisIsBlocked');
   };
   
   return (
@@ -85,28 +103,24 @@ export default function BlockedPage() {
           </svg>
         </div>
         
-        <h1 className="blocked-title">Stay Focused</h1>
+        <h1 className="blocked-title">{t('blocked.stayFocused')}</h1>
         
         <p className="blocked-site">
-          {blockedUrl || 'This site'} is blocked
+          {getBlockedMessage()}
         </p>
         
-        {message && (
-          <p className="blocked-message">{message}</p>
+        {quote && (
+          <div className="blocked-quote">
+            <p className="quote-text">"{quote.text}"</p>
+            <p className="quote-author">— {quote.author}</p>
+          </div>
         )}
         
-        <div className="blocked-quote">
-          <p className="quote-text">"{quote.text}"</p>
-          <p className="quote-author">— {quote.author}</p>
-        </div>
-        
         <div className="breathing-exercise">
-          <p className="breathing-label">Take a moment to breathe</p>
+          <p className="breathing-label">{t('blocked.breathe')}</p>
           <div className={`breathing-circle ${breathingPhase}`}>
             <span className="breathing-text">
-              {breathingPhase === 'inhale' && 'Breathe in...'}
-              {breathingPhase === 'hold' && 'Hold...'}
-              {breathingPhase === 'exhale' && 'Breathe out...'}
+              {getBreathingText()}
             </span>
           </div>
         </div>
@@ -116,15 +130,14 @@ export default function BlockedPage() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Go Back
+            {t('blocked.goBack')}
           </button>
           
           <button className="btn btn-ghost" onClick={handleOpenOptions}>
-            Settings
+            {t('common.settings')}
           </button>
         </div>
       </div>
     </div>
   );
 }
-

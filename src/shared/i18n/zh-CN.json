@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "add": "添加",
+    "delete": "删除",
+    "edit": "编辑",
+    "done": "完成",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "active": "活跃",
+    "off": "关闭",
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "saved": "已保存",
+    "settings": "设置",
+    "today": "今天",
+    "total": "总计",
+    "minutes": "分钟",
+    "seconds": "秒",
+    "sessions": "次",
+    "minPerDay": "分钟/天",
+    "extension": "扩展"
+  },
+  "popup": {
+    "timer": "计时器",
+    "stats": "统计",
+    "pomodoros": "番茄钟",
+    "status": "状态",
+    "disableBlocking": "禁用拦截",
+    "enableBlocking": "启用拦截"
+  },
+  "pomodoro": {
+    "focusTime": "专注时间",
+    "shortBreak": "短休息",
+    "longBreak": "长休息",
+    "readyToFocus": "准备专注",
+    "session": "第",
+    "start": "开始",
+    "resume": "继续",
+    "pause": "暂停",
+    "skipToNext": "跳到下一阶段",
+    "resetTimer": "重置计时器",
+    "work": "工作",
+    "break": "休息",
+    "workComplete": "工作时段完成！",
+    "workCompleteBody": "该休息了。专注得很好！",
+    "breakComplete": "休息结束！",
+    "breakCompleteBody": "准备好继续工作了吗？"
+  },
+  "stats": {
+    "todaysActivity": "今日活动",
+    "noActivityYet": "暂无活动",
+    "startBrowsing": "开始浏览，您的时间将在此记录。",
+    "weeklyOverview": "每周概览",
+    "weeklyDesc": "过去7天的浏览时间",
+    "noDataForDay": "当天无数据",
+    "browseToSee": "浏览网站以查看您的时间跟踪数据"
+  },
+  "blockedSites": {
+    "title": "已拦截网站",
+    "addTitle": "添加拦截网站",
+    "addDesc": "输入要拦截的域名或URL模式（例如：youtube.com/shorts, x.com）",
+    "placeholder": "example.com 或 example.com/path",
+    "addButton": "添加网站",
+    "sitesCount": "拦截列表中有 {count} 个网站",
+    "sitesCountPlural": "拦截列表中有 {count} 个网站",
+    "noSitesYet": "暂无拦截网站",
+    "addFirstSite": "在上方添加第一个网站以开始拦截干扰",
+    "modeBlock": "拦截",
+    "modeFriction": "阻力",
+    "modeTimeLimit": "时间限制"
+  },
+  "schedules": {
+    "title": "拦截时间表",
+    "description": "网站仅在活动时间表期间被拦截",
+    "addSchedule": "添加时间表",
+    "scheduleName": "时间表名称",
+    "scheduleNamePlaceholder": "例如：工作时间、学习时间",
+    "days": "日期",
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "updateSchedule": "更新时间表",
+    "noSchedulesYet": "暂无时间表",
+    "noSchedulesDesc": "没有时间表，拦截将一直启用。添加时间表以限制拦截到特定时间。",
+    "everyDay": "每天",
+    "weekdays": "工作日",
+    "weekends": "周末"
+  },
+  "friction": {
+    "title": "阻力",
+    "description": "配置访问阻力模式网站的延迟和要求",
+    "preview": "预览",
+    "previewIntro": "访问启用阻力的网站时：",
+    "previewWait": "等待 {seconds} 秒",
+    "previewType": "输入：「{phrase}」",
+    "previewAccess": "获得 {minutes} 分钟的访问权限",
+    "delayDuration": "延迟时长（秒）",
+    "requirePhrase": "需要输入短语",
+    "phraseToType": "要输入的短语",
+    "phrasePlaceholder": "例如：我想拖延",
+    "phraseHint": "用户必须准确输入此短语才能访问网站",
+    "bypassDuration": "绕过时长（分钟）",
+    "bypassHint": "完成阻力后，将获得此时长的访问权限"
+  },
+  "pomodoroSettings": {
+    "tabTitle": "番茄钟",
+    "durationsTitle": "计时器时长",
+    "durationsDesc": "自定义您的专注和休息间隔",
+    "behaviorTitle": "行为",
+    "behaviorDesc": "自定义计时器的行为方式",
+    "shortBreak": "短休息",
+    "longBreak": "长休息",
+    "sessionsUntilLong": "长休息前的次数",
+    "autoStartBreaks": "自动开始休息",
+    "autoStartBreaksDesc": "工作时段结束时自动开始休息计时器",
+    "autoStartWork": "自动开始工作时段",
+    "autoStartWorkDesc": "休息结束时自动开始工作计时器",
+    "blockDuringWork": "工作时段期间拦截",
+    "blockDuringWorkDesc": "在专注时间启用严格拦截",
+    "notifications": "桌面通知",
+    "notificationsDesc": "时段结束时显示通知"
+  },
+  "blocked": {
+    "stayFocused": "保持专注",
+    "siteBlocked": "{site} 已被拦截",
+    "thisIsBlocked": "此网站已被拦截",
+    "dailyLimitReached": "已达到每日时间限制",
+    "breathe": "花点时间深呼吸",
+    "breatheIn": "吸气...",
+    "hold": "屏住...",
+    "breatheOut": "呼气...",
+    "goBack": "返回"
+  },
+  "frictionOverlay": {
+    "wait": "请稍等...",
+    "almostThere": "快好了...",
+    "typePhrase": "输入此短语以继续：",
+    "continue": "继续访问网站",
+    "returnToSafety": "返回安全"
+  },
+  "timeLimitWidget": {
+    "timeRemaining": "剩余时间",
+    "hideWidget": "隐藏小部件"
+  },
+  "language": {
+    "title": "语言",
+    "auto": "自动（浏览器）",
+    "en": "English",
+    "es": "Español",
+    "zh-CN": "简体中文",
+    "pt-BR": "Português (BR)"
+  },
+  "days": {
+    "sun": "周日",
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六"
+  },
+  "quotes": [
+    {
+      "text": "成功的秘诀在于开始行动。",
+      "author": "马克·吐温"
+    },
+    {
+      "text": "专注于高效，而非忙碌。",
+      "author": "蒂姆·费里斯"
+    },
+    {
+      "text": "不是我有多聪明，而是我与问题相处的时间更长。",
+      "author": "阿尔伯特·爱因斯坦"
+    },
+    {
+      "text": "开始的方法就是停止空谈，开始行动。",
+      "author": "沃尔特·迪士尼"
+    },
+    {
+      "text": "不要看时钟；做时钟做的事。继续前进。",
+      "author": "山姆·莱文森"
+    },
+    {
+      "text": "你的未来由今天的行动创造，而非明天。",
+      "author": "罗伯特·清崎"
+    },
+    {
+      "text": "成就伟大工作的唯一方法是热爱你所做的事。",
+      "author": "史蒂夫·乔布斯"
+    },
+    {
+      "text": "成功不是终点，失败不是致命的：重要的是继续前进的勇气。",
+      "author": "温斯顿·丘吉尔"
+    }
+  ]
+}
+

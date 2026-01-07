@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Schedule } from '../../shared/types';
-import { generateId, getDayName } from '../../shared/utils';
+import { generateId } from '../../shared/utils';
+import { useTranslation } from '../../shared/i18n';
 
 interface Props {
   schedules: Schedule[];
@@ -10,6 +11,7 @@ interface Props {
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6]; // Sunday to Saturday
 
 export default function SchedulesSection({ schedules, onUpdate }: Props) {
+  const { t, getDayName } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -87,9 +89,9 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
   };
   
   const formatDays = (days: number[]) => {
-    if (days.length === 7) return 'Every day';
-    if (days.length === 5 && !days.includes(0) && !days.includes(6)) return 'Weekdays';
-    if (days.length === 2 && days.includes(0) && days.includes(6)) return 'Weekends';
+    if (days.length === 7) return t('schedules.everyDay');
+    if (days.length === 5 && !days.includes(0) && !days.includes(6)) return t('schedules.weekdays');
+    if (days.length === 2 && days.includes(0) && days.includes(6)) return t('schedules.weekends');
     return days.map(d => getDayName(d)).join(', ');
   };
   
@@ -98,9 +100,9 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Blocking Schedules</h2>
+            <h2 className="settings-section-title">{t('schedules.title')}</h2>
             <p className="settings-section-desc">
-              Sites are only blocked during active schedule times
+              {t('schedules.description')}
             </p>
           </div>
           
@@ -109,7 +111,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
               className="btn btn-primary"
               onClick={() => setShowForm(true)}
             >
-              + Add Schedule
+              + {t('schedules.addSchedule')}
             </button>
           )}
         </div>
@@ -117,18 +119,18 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
         {showForm && (
           <div className="schedule-form">
             <div className="form-group">
-              <label className="form-label">Schedule Name</label>
+              <label className="form-label">{t('schedules.scheduleName')}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g., Work Hours, Study Time"
+                placeholder={t('schedules.scheduleNamePlaceholder')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label">Days</label>
+              <label className="form-label">{t('schedules.days')}</label>
               <div className="day-picker">
                 {ALL_DAYS.map((day) => (
                   <button
@@ -144,7 +146,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
             
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Start Time</label>
+                <label className="form-label">{t('schedules.startTime')}</label>
                 <input
                   type="time"
                   className="form-input"
@@ -154,7 +156,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
               </div>
               
               <div className="form-group">
-                <label className="form-label">End Time</label>
+                <label className="form-label">{t('schedules.endTime')}</label>
                 <input
                   type="time"
                   className="form-input"
@@ -166,13 +168,13 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
             
             <div className="form-actions">
               <button className="btn btn-secondary" onClick={resetForm}>
-                Cancel
+                {t('common.cancel')}
               </button>
               <button 
                 className="btn btn-primary" 
                 onClick={editingId ? handleUpdate : handleAdd}
               >
-                {editingId ? 'Update' : 'Add'} Schedule
+                {editingId ? t('schedules.updateSchedule') : t('schedules.addSchedule')}
               </button>
             </div>
           </div>
@@ -181,9 +183,9 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
         {!showForm && schedules.length === 0 && (
           <div className="empty-state">
             <div className="empty-state-icon">📅</div>
-            <p className="empty-state-title">No schedules yet</p>
+            <p className="empty-state-title">{t('schedules.noSchedulesYet')}</p>
             <p className="empty-state-text">
-              Without schedules, blocking is always active. Add a schedule to limit blocking to specific times.
+              {t('schedules.noSchedulesDesc')}
             </p>
           </div>
         )}
@@ -208,7 +210,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
                   <button 
                     className="btn-icon-sm"
                     onClick={() => handleEdit(schedule)}
-                    title="Edit"
+                    title={t('common.edit')}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -218,7 +220,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
                   <button 
                     className="btn-icon-sm danger"
                     onClick={() => handleDelete(schedule.id)}
-                    title="Delete"
+                    title={t('common.delete')}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -280,4 +282,3 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
     </div>
   );
 }
-

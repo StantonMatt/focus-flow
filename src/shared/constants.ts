@@ -61,17 +61,8 @@ export const DEFAULT_BLOCKED_SITES: BlockedSite[] = [
   },
 ];
 
-// Default schedule (work hours)
-export const DEFAULT_SCHEDULES: Schedule[] = [
-  {
-    id: 'work-hours',
-    name: 'Work Hours',
-    days: [1, 2, 3, 4, 5], // Monday-Friday
-    startTime: '09:00',
-    endTime: '17:00',
-    enabled: true,
-  },
-];
+// Default schedules (empty - user creates their own with localized names)
+export const DEFAULT_SCHEDULES: Schedule[] = [];
 
 // Default settings
 export const DEFAULT_SETTINGS: Settings = {
@@ -80,6 +71,7 @@ export const DEFAULT_SETTINGS: Settings = {
   schedules: DEFAULT_SCHEDULES,
   friction: DEFAULT_FRICTION,
   pomodoro: DEFAULT_POMODORO,
+  language: 'auto',
 };
 
 // Storage keys

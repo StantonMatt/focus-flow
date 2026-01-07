@@ -232,7 +232,11 @@
 .form-row {
   display: flex;
   gap: 16px;
-  align-items: flex-end;
+  align-items: center;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
 }
 
 .form-checkbox {

@@ -1,4 +1,5 @@
 import type { PomodoroSettings } from '../../shared/types';
+import { useTranslation } from '../../shared/i18n';
 
 interface Props {
   pomodoro: PomodoroSettings;
@@ -6,6 +7,8 @@ interface Props {
 }
 
 export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
+  const { t } = useTranslation();
+  
   const handleChange = (field: keyof PomodoroSettings, value: unknown) => {
     onUpdate({ ...pomodoro, [field]: value });
   };
@@ -15,9 +18,9 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Timer Durations</h2>
+            <h2 className="settings-section-title">{t('pomodoroSettings.durationsTitle')}</h2>
             <p className="settings-section-desc">
-              Customize your focus and break intervals
+              {t('pomodoroSettings.durationsDesc')}
             </p>
           </div>
         </div>
@@ -25,7 +28,7 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
         <div className="duration-grid">
           <div className="duration-card">
             <div className="duration-icon work">🎯</div>
-            <div className="duration-label">Work</div>
+            <div className="duration-label">{t('pomodoro.work')}</div>
             <div className="duration-input-group">
               <input
                 type="number"
@@ -35,13 +38,13 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
                 min="1"
                 max="120"
               />
-              <span className="duration-unit">min</span>
+              <span className="duration-unit">{t('common.minutes')}</span>
             </div>
           </div>
           
           <div className="duration-card">
             <div className="duration-icon short">☕</div>
-            <div className="duration-label">Short Break</div>
+            <div className="duration-label">{t('pomodoroSettings.shortBreak')}</div>
             <div className="duration-input-group">
               <input
                 type="number"
@@ -51,13 +54,13 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
                 min="1"
                 max="30"
               />
-              <span className="duration-unit">min</span>
+              <span className="duration-unit">{t('common.minutes')}</span>
             </div>
           </div>
           
           <div className="duration-card">
             <div className="duration-icon long">🌴</div>
-            <div className="duration-label">Long Break</div>
+            <div className="duration-label">{t('pomodoroSettings.longBreak')}</div>
             <div className="duration-input-group">
               <input
                 type="number"
@@ -67,13 +70,13 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
                 min="1"
                 max="60"
               />
-              <span className="duration-unit">min</span>
+              <span className="duration-unit">{t('common.minutes')}</span>
             </div>
           </div>
           
           <div className="duration-card">
             <div className="duration-icon sessions">🔄</div>
-            <div className="duration-label">Sessions until long break</div>
+            <div className="duration-label">{t('pomodoroSettings.sessionsUntilLong')}</div>
             <div className="duration-input-group">
               <input
                 type="number"
@@ -83,7 +86,7 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
                 min="2"
                 max="10"
               />
-              <span className="duration-unit">sessions</span>
+              <span className="duration-unit">{t('common.sessions')}</span>
             </div>
           </div>
         </div>
@@ -92,9 +95,9 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Behavior</h2>
+            <h2 className="settings-section-title">{t('pomodoroSettings.behaviorTitle')}</h2>
             <p className="settings-section-desc">
-              Customize how the timer behaves
+              {t('pomodoroSettings.behaviorDesc')}
             </p>
           </div>
         </div>
@@ -102,8 +105,8 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
         <div className="toggle-list">
           <div className="toggle-item">
             <div className="toggle-info">
-              <div className="toggle-title">Auto-start breaks</div>
-              <div className="toggle-desc">Automatically start break timer when work session ends</div>
+              <div className="toggle-title">{t('pomodoroSettings.autoStartBreaks')}</div>
+              <div className="toggle-desc">{t('pomodoroSettings.autoStartBreaksDesc')}</div>
             </div>
             <button
               className={`toggle ${pomodoro.autoStartBreaks ? 'active' : ''}`}
@@ -113,8 +116,8 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
           
           <div className="toggle-item">
             <div className="toggle-info">
-              <div className="toggle-title">Auto-start work sessions</div>
-              <div className="toggle-desc">Automatically start work timer when break ends</div>
+              <div className="toggle-title">{t('pomodoroSettings.autoStartWork')}</div>
+              <div className="toggle-desc">{t('pomodoroSettings.autoStartWorkDesc')}</div>
             </div>
             <button
               className={`toggle ${pomodoro.autoStartWork ? 'active' : ''}`}
@@ -124,8 +127,8 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
           
           <div className="toggle-item">
             <div className="toggle-info">
-              <div className="toggle-title">Block during work sessions</div>
-              <div className="toggle-desc">Enable strict blocking during focus time</div>
+              <div className="toggle-title">{t('pomodoroSettings.blockDuringWork')}</div>
+              <div className="toggle-desc">{t('pomodoroSettings.blockDuringWorkDesc')}</div>
             </div>
             <button
               className={`toggle ${pomodoro.blockDuringWork ? 'active' : ''}`}
@@ -135,8 +138,8 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
           
           <div className="toggle-item">
             <div className="toggle-info">
-              <div className="toggle-title">Desktop notifications</div>
-              <div className="toggle-desc">Show notifications when sessions end</div>
+              <div className="toggle-title">{t('pomodoroSettings.notifications')}</div>
+              <div className="toggle-desc">{t('pomodoroSettings.notificationsDesc')}</div>
             </div>
             <button
               className={`toggle ${pomodoro.notificationsEnabled ? 'active' : ''}`}
@@ -237,4 +240,3 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
     </div>
   );
 }
-

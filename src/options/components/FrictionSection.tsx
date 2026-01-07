@@ -1,4 +1,5 @@
 import type { FrictionSettings } from '../../shared/types';
+import { useTranslation } from '../../shared/i18n';
 
 interface Props {
   friction: FrictionSettings;
@@ -6,6 +7,8 @@ interface Props {
 }
 
 export default function FrictionSection({ friction, onUpdate }: Props) {
+  const { t } = useTranslation();
+  
   const handleChange = (field: keyof FrictionSettings, value: unknown) => {
     onUpdate({ ...friction, [field]: value });
   };
@@ -15,29 +18,29 @@ export default function FrictionSection({ friction, onUpdate }: Props) {
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Friction Settings</h2>
+            <h2 className="settings-section-title">{t('friction.title')}</h2>
             <p className="settings-section-desc">
-              Configure the delay and requirements for accessing friction-mode sites
+              {t('friction.description')}
             </p>
           </div>
         </div>
         
         <div className="friction-preview">
-          <div className="preview-label">Preview</div>
+          <div className="preview-label">{t('friction.preview')}</div>
           <div className="preview-content">
-            <p>When visiting a friction-enabled site:</p>
+            <p>{t('friction.previewIntro')}</p>
             <ol>
-              <li>Wait {friction.delaySeconds} seconds</li>
+              <li>{t('friction.previewWait', { seconds: friction.delaySeconds })}</li>
               {friction.requirePhrase && (
-                <li>Type: "{friction.phrase}"</li>
+                <li>{t('friction.previewType', { phrase: friction.phrase })}</li>
               )}
-              <li>Access granted for {friction.bypassDurationMinutes} minutes</li>
+              <li>{t('friction.previewAccess', { minutes: friction.bypassDurationMinutes })}</li>
             </ol>
           </div>
         </div>
         
         <div className="form-group">
-          <label className="form-label">Delay Duration (seconds)</label>
+          <label className="form-label">{t('friction.delayDuration')}</label>
           <input
             type="range"
             className="form-range"
@@ -48,9 +51,9 @@ export default function FrictionSection({ friction, onUpdate }: Props) {
             onChange={(e) => handleChange('delaySeconds', parseInt(e.target.value))}
           />
           <div className="range-labels">
-            <span>5s</span>
-            <span className="range-value">{friction.delaySeconds}s</span>
-            <span>60s</span>
+            <span>5{t('common.seconds')}</span>
+            <span className="range-value">{friction.delaySeconds}{t('common.seconds')}</span>
+            <span>60{t('common.seconds')}</span>
           </div>
         </div>
         
@@ -61,28 +64,28 @@ export default function FrictionSection({ friction, onUpdate }: Props) {
               checked={friction.requirePhrase}
               onChange={(e) => handleChange('requirePhrase', e.target.checked)}
             />
-            <span className="form-checkbox-label">Require typing a phrase</span>
+            <span className="form-checkbox-label">{t('friction.requirePhrase')}</span>
           </label>
         </div>
         
         {friction.requirePhrase && (
           <div className="form-group">
-            <label className="form-label">Phrase to Type</label>
+            <label className="form-label">{t('friction.phraseToType')}</label>
             <input
               type="text"
               className="form-input"
               value={friction.phrase}
               onChange={(e) => handleChange('phrase', e.target.value)}
-              placeholder="e.g., I want to procrastinate"
+              placeholder={t('friction.phrasePlaceholder')}
             />
             <p className="form-hint">
-              Users must type this phrase exactly to access the site
+              {t('friction.phraseHint')}
             </p>
           </div>
         )}
         
         <div className="form-group">
-          <label className="form-label">Bypass Duration (minutes)</label>
+          <label className="form-label">{t('friction.bypassDuration')}</label>
           <input
             type="range"
             className="form-range"
@@ -93,12 +96,12 @@ export default function FrictionSection({ friction, onUpdate }: Props) {
             onChange={(e) => handleChange('bypassDurationMinutes', parseInt(e.target.value))}
           />
           <div className="range-labels">
-            <span>5m</span>
-            <span className="range-value">{friction.bypassDurationMinutes}m</span>
-            <span>60m</span>
+            <span>5{t('common.minutes')}</span>
+            <span className="range-value">{friction.bypassDurationMinutes}{t('common.minutes')}</span>
+            <span>60{t('common.minutes')}</span>
           </div>
           <p className="form-hint">
-            After completing friction, access is granted for this duration
+            {t('friction.bypassHint')}
           </p>
         </div>
       </div>
@@ -182,4 +185,3 @@ export default function FrictionSection({ friction, onUpdate }: Props) {
     </div>
   );
 }
-

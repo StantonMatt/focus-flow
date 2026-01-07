@@ -1,6 +1,7 @@
 import type { CheckBlockedResponse, Message } from '../shared/types';
 import { extractDomain, formatDuration } from '../shared/utils';
 import { HEARTBEAT_INTERVAL } from '../shared/constants';
+import { getTranslator } from '../shared/i18n';
 import { initYouTubeShortsBlocking, isYouTube } from './youtube';
 
 // Track state
@@ -10,6 +11,9 @@ let isFrictionActive = false;
 let isBlocked = false;
 let timeLimitWidget: HTMLElement | null = null;
 let timeLimitRemaining = 0;
+
+// Translation function (will be initialized)
+let t: (key: string, params?: Record<string, string | number>) => string = (key) => key;
 
 // Check if extension context is still valid
 function isExtensionValid(): boolean {
@@ -82,6 +86,14 @@ async function init() {
   // Wait for body to exist before doing anything
   await waitForBody();
   
+  // Initialize translations
+  try {
+    const translator = await getTranslator();
+    t = translator.t;
+  } catch (e) {
+    console.log('Focus Flow: Could not load translations, using defaults');
+  }
+  
   // Small delay to ensure service worker is ready
   await new Promise(resolve => setTimeout(resolve, 100));
   
@@ -124,7 +136,7 @@ async function checkAndBlock() {
       showFrictionOverlay();
     } else if (response.mode === 'time-limit') {
       isBlocked = true;
-      showBlockedPage('Daily time limit reached');
+      showBlockedPage(t('blocked.dailyLimitReached'));
     }
   } else if (response.remainingTime !== undefined && response.remainingTime > 0) {
     // Site has a time limit but not exceeded yet - show countdown widget
@@ -152,6 +164,9 @@ function showBlockedPage(message?: string) {
 // Show time limit countdown widget
 function showTimeLimitWidget() {
   if (timeLimitWidget) return;
+  
+  const timeRemainingLabel = t('timeLimitWidget.timeRemaining');
+  const hideWidgetLabel = t('timeLimitWidget.hideWidget');
   
   timeLimitWidget = document.createElement('div');
   timeLimitWidget.id = 'focus-flow-time-limit-widget';
@@ -237,10 +252,10 @@ function showTimeLimitWidget() {
     
     <div class="time-limit-icon">⏱️</div>
     <div class="time-limit-info">
-      <span class="time-limit-label">Time remaining</span>
+      <span class="time-limit-label">${timeRemainingLabel}</span>
       <span class="time-limit-time" id="time-limit-countdown">${formatDuration(timeLimitRemaining)}</span>
     </div>
-    <button class="time-limit-close" id="time-limit-close" title="Hide widget">×</button>
+    <button class="time-limit-close" id="time-limit-close" title="${hideWidgetLabel}">×</button>
   `;
   
   document.body.appendChild(timeLimitWidget);
@@ -274,7 +289,7 @@ function showTimeLimitWidget() {
       
       if (response?.isBlocked && response.mode === 'time-limit') {
         // Time limit exceeded - redirect
-        showBlockedPage('Daily time limit reached');
+        showBlockedPage(t('blocked.dailyLimitReached'));
         return;
       } else if (response?.remainingTime !== undefined) {
         timeLimitRemaining = response.remainingTime;
@@ -294,7 +309,7 @@ function showTimeLimitWidget() {
     
     // Time's up - redirect to blocked page
     if (timeLimitRemaining <= 0) {
-      showBlockedPage('Daily time limit reached');
+      showBlockedPage(t('blocked.dailyLimitReached'));
       return;
     }
     
@@ -342,6 +357,11 @@ function makeDraggable(element: HTMLElement) {
 // Show friction overlay
 function showFrictionOverlay() {
   if (document.getElementById('focus-flow-friction-overlay')) return;
+  
+  const waitTitle = t('frictionOverlay.wait');
+  const typePhraseLabel = t('frictionOverlay.typePhrase');
+  const continueBtn = t('frictionOverlay.continue');
+  const returnBtn = t('frictionOverlay.returnToSafety');
   
   const overlay = document.createElement('div');
   overlay.id = 'focus-flow-friction-overlay';
@@ -399,11 +419,8 @@ function showFrictionOverlay() {
     
     <div class="friction-content">
       <div class="friction-icon">⏳</div>
-      <h1 class="friction-title">Wait a moment...</h1>
-      <p class="friction-message">
-        You're about to visit a distracting site.<br>
-        Take a breath and consider if this is really what you want to do.
-      </p>
+      <h1 class="friction-title" id="friction-title">${waitTitle}</h1>
+      <p class="friction-message" id="friction-message"></p>
       
       <div class="friction-timer" id="friction-timer">10</div>
       <div class="friction-progress">
@@ -411,14 +428,14 @@ function showFrictionOverlay() {
       </div>
       
       <div class="friction-phrase-container" id="phrase-container" style="display: none;">
-        <p class="friction-phrase-label">Type this phrase to continue:</p>
+        <p class="friction-phrase-label">${typePhraseLabel}</p>
         <div class="friction-phrase-target" id="phrase-target"></div>
-        <input type="text" class="friction-input" id="phrase-input" placeholder="Type the phrase above..." autocomplete="off" />
+        <input type="text" class="friction-input" id="phrase-input" placeholder="..." autocomplete="off" />
       </div>
       
       <div class="friction-buttons">
-        <button class="friction-btn friction-btn-secondary" id="go-back-btn">Go Back</button>
-        <button class="friction-btn friction-btn-primary" id="continue-btn" disabled>Continue</button>
+        <button class="friction-btn friction-btn-secondary" id="go-back-btn">${returnBtn}</button>
+        <button class="friction-btn friction-btn-primary" id="continue-btn" disabled>${continueBtn}</button>
       </div>
     </div>
   `;
@@ -441,6 +458,7 @@ async function initFrictionLogic(overlay: HTMLElement) {
   const requirePhrase = settings?.friction?.requirePhrase ?? true;
   const phrase = settings?.friction?.phrase || 'I want to procrastinate';
   
+  const titleEl = overlay.querySelector('#friction-title') as HTMLElement;
   const timerEl = overlay.querySelector('#friction-timer') as HTMLElement;
   const progressEl = overlay.querySelector('#friction-progress') as HTMLElement;
   const phraseContainer = overlay.querySelector('#phrase-container') as HTMLElement;
@@ -464,6 +482,7 @@ async function initFrictionLogic(overlay: HTMLElement) {
     } else {
       timerEl.textContent = '✓';
       timerEl.style.color = '#00d4aa';
+      titleEl.textContent = t('frictionOverlay.almostThere');
       
       if (requirePhrase) {
         phraseContainer.style.display = 'block';

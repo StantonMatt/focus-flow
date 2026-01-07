@@ -1,5 +1,6 @@
 import type { PomodoroState, PomodoroSettings } from '../../shared/types';
 import { formatTime } from '../../shared/utils';
+import { useTranslation } from '../../shared/i18n';
 import './PomodoroTimer.css';
 
 interface Props {
@@ -9,16 +10,18 @@ interface Props {
 }
 
 export default function PomodoroTimer({ state, settings, onAction }: Props) {
+  const { t } = useTranslation();
+  
   const getPhaseLabel = () => {
     switch (state.phase) {
       case 'work':
-        return 'Focus Time';
+        return t('pomodoro.focusTime');
       case 'short-break':
-        return 'Short Break';
+        return t('pomodoro.shortBreak');
       case 'long-break':
-        return 'Long Break';
+        return t('pomodoro.longBreak');
       default:
-        return 'Ready to Focus';
+        return t('pomodoro.readyToFocus');
     }
   };
   
@@ -97,7 +100,7 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
           </span>
           <span className="timer-time">{displayTime}</span>
           <span className="timer-sessions">
-            Session {state.sessionsCompleted + 1}
+            {t('pomodoro.session')} {state.sessionsCompleted + 1}
           </span>
         </div>
       </div>
@@ -111,7 +114,7 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z" />
             </svg>
-            {state.phase === 'idle' ? 'Start' : 'Resume'}
+            {state.phase === 'idle' ? t('pomodoro.start') : t('pomodoro.resume')}
           </button>
         ) : (
           <button 
@@ -122,14 +125,14 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
               <rect x="6" y="4" width="4" height="16" />
               <rect x="14" y="4" width="4" height="16" />
             </svg>
-            Pause
+            {t('pomodoro.pause')}
           </button>
         )}
         
         <button 
           className="timer-btn-icon"
           onClick={() => onAction('skip')}
-          title="Skip to next phase"
+          title={t('pomodoro.skipToNext')}
           disabled={state.phase === 'idle'}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -140,7 +143,7 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
         <button 
           className="timer-btn-icon"
           onClick={() => onAction('reset')}
-          title="Reset timer"
+          title={t('pomodoro.resetTimer')}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -151,21 +154,20 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
       
       <div className="timer-info">
         <div className="timer-info-item">
-          <span className="timer-info-value">{settings.workDurationMinutes}m</span>
-          <span className="timer-info-label">Work</span>
+          <span className="timer-info-value">{settings.workDurationMinutes}{t('common.minutes')}</span>
+          <span className="timer-info-label">{t('pomodoro.work')}</span>
         </div>
         <div className="timer-info-divider" />
         <div className="timer-info-item">
-          <span className="timer-info-value">{settings.shortBreakMinutes}m</span>
-          <span className="timer-info-label">Break</span>
+          <span className="timer-info-value">{settings.shortBreakMinutes}{t('common.minutes')}</span>
+          <span className="timer-info-label">{t('pomodoro.break')}</span>
         </div>
         <div className="timer-info-divider" />
         <div className="timer-info-item">
           <span className="timer-info-value">{state.todayPomodoros}</span>
-          <span className="timer-info-label">Done</span>
+          <span className="timer-info-label">{t('common.done')}</span>
         </div>
       </div>
     </div>
   );
 }
-

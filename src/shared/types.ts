@@ -63,6 +63,9 @@ export interface DailyTimeStats {
   [domain: string]: number;  // seconds spent
 }
 
+// Supported languages
+export type Language = 'auto' | 'en' | 'es' | 'zh-CN' | 'pt-BR';
+
 // Main settings object
 export interface Settings {
   enabled: boolean;
@@ -70,6 +73,7 @@ export interface Settings {
   schedules: Schedule[];
   friction: FrictionSettings;
   pomodoro: PomodoroSettings;
+  language: Language;
 }
 
 // Messages between content scripts and service worker

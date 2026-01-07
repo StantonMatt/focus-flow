@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DailyTimeStats } from '../../shared/types';
 import { formatDuration } from '../../shared/utils';
+import { useTranslation } from '../../shared/i18n';
 
 export default function TimeStatsSection() {
+  const { t, getDayName } = useTranslation();
   const [allStats, setAllStats] = useState<Record<string, DailyTimeStats>>({} as Record<string, DailyTimeStats>);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
@@ -57,29 +59,33 @@ export default function TimeStatsSection() {
   
   const formatDateShort = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return getDayName(date.getDay());
   };
   
   const availableDates = Object.keys(allStats).sort().reverse();
+  
+  const isToday = (dateStr: string) => {
+    return dateStr === new Date().toISOString().split('T')[0];
+  };
   
   return (
     <div>
       <div className="settings-section">
         <div className="settings-section-header">
           <div>
-            <h2 className="settings-section-title">Weekly Overview</h2>
+            <h2 className="settings-section-title">{t('stats.weeklyOverview')}</h2>
             <p className="settings-section-desc">
-              Your browsing time over the past 7 days
+              {t('stats.weeklyDesc')}
             </p>
           </div>
           <div className="refresh-info">
-            <button className="refresh-btn" onClick={loadStats} title="Refresh now">
+            <button className="refresh-btn" onClick={loadStats} title="Refresh">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                 <path d="M3 3v5h5" />
               </svg>
             </button>
-            <span className="refresh-countdown">{secondsUntilRefresh}s</span>
+            <span className="refresh-countdown">{secondsUntilRefresh}{t('common.seconds')}</span>
           </div>
         </div>
         
@@ -105,10 +111,10 @@ export default function TimeStatsSection() {
         <div className="settings-section-header">
           <div>
             <h2 className="settings-section-title">
-              {selectedDate === new Date().toISOString().split('T')[0] ? 'Today' : selectedDate}
+              {isToday(selectedDate) ? t('common.today') : selectedDate}
             </h2>
             <p className="settings-section-desc">
-              Total: {formatDuration(totalTime)}
+              {t('common.total')}: {formatDuration(totalTime)}
             </p>
           </div>
           
@@ -121,7 +127,7 @@ export default function TimeStatsSection() {
             >
               {availableDates.map(date => (
                 <option key={date} value={date}>
-                  {date === new Date().toISOString().split('T')[0] ? 'Today' : date}
+                  {isToday(date) ? t('common.today') : date}
                 </option>
               ))}
             </select>
@@ -131,9 +137,9 @@ export default function TimeStatsSection() {
         {sortedDomains.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📊</div>
-            <p className="empty-state-title">No data for this day</p>
+            <p className="empty-state-title">{t('stats.noDataForDay')}</p>
             <p className="empty-state-text">
-              Browse some websites to see your time tracking data
+              {t('stats.browseToSee')}
             </p>
           </div>
         ) : (
@@ -311,4 +317,3 @@ export default function TimeStatsSection() {
     </div>
   );
 }
-

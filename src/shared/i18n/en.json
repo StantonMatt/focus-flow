@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "active": "Active",
+    "off": "Off",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "settings": "Settings",
+    "today": "Today",
+    "total": "Total",
+    "minutes": "min",
+    "seconds": "s",
+    "sessions": "sessions",
+    "minPerDay": "min/day",
+    "extension": "Extension"
+  },
+  "popup": {
+    "timer": "Timer",
+    "stats": "Stats",
+    "pomodoros": "Pomodoros",
+    "status": "Status",
+    "disableBlocking": "Disable blocking",
+    "enableBlocking": "Enable blocking"
+  },
+  "pomodoro": {
+    "focusTime": "Focus Time",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "readyToFocus": "Ready to Focus",
+    "session": "Session",
+    "start": "Start",
+    "resume": "Resume",
+    "pause": "Pause",
+    "skipToNext": "Skip to next phase",
+    "resetTimer": "Reset timer",
+    "work": "Work",
+    "break": "Break",
+    "workComplete": "Work Session Complete!",
+    "workCompleteBody": "Time for a break. Great job staying focused!",
+    "breakComplete": "Break Over!",
+    "breakCompleteBody": "Ready to get back to work?"
+  },
+  "stats": {
+    "todaysActivity": "Today's Activity",
+    "noActivityYet": "No activity yet",
+    "startBrowsing": "Start browsing and your time will be tracked here.",
+    "weeklyOverview": "Weekly Overview",
+    "weeklyDesc": "Your browsing time over the past 7 days",
+    "noDataForDay": "No data for this day",
+    "browseToSee": "Browse some websites to see your time tracking data"
+  },
+  "blockedSites": {
+    "title": "Blocked Sites",
+    "addTitle": "Add Blocked Site",
+    "addDesc": "Enter a domain or URL pattern to block (e.g., youtube.com/shorts, x.com)",
+    "placeholder": "example.com or example.com/path",
+    "addButton": "Add Site",
+    "sitesCount": "{count} site in your blocklist",
+    "sitesCountPlural": "{count} sites in your blocklist",
+    "noSitesYet": "No blocked sites yet",
+    "addFirstSite": "Add your first site above to start blocking distractions",
+    "modeBlock": "Block",
+    "modeFriction": "Friction",
+    "modeTimeLimit": "Time Limit"
+  },
+  "schedules": {
+    "title": "Blocking Schedules",
+    "description": "Sites are only blocked during active schedule times",
+    "addSchedule": "Add Schedule",
+    "scheduleName": "Schedule Name",
+    "scheduleNamePlaceholder": "e.g., Work Hours, Study Time",
+    "days": "Days",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "updateSchedule": "Update Schedule",
+    "noSchedulesYet": "No schedules yet",
+    "noSchedulesDesc": "Without schedules, blocking is always active. Add a schedule to limit blocking to specific times.",
+    "everyDay": "Every day",
+    "weekdays": "Weekdays",
+    "weekends": "Weekends"
+  },
+  "friction": {
+    "title": "Friction",
+    "description": "Configure the delay and requirements for accessing friction-mode sites",
+    "preview": "Preview",
+    "previewIntro": "When visiting a friction-enabled site:",
+    "previewWait": "Wait {seconds} seconds",
+    "previewType": "Type: \"{phrase}\"",
+    "previewAccess": "Access granted for {minutes} minutes",
+    "delayDuration": "Delay Duration (seconds)",
+    "requirePhrase": "Require typing a phrase",
+    "phraseToType": "Phrase to Type",
+    "phrasePlaceholder": "e.g., I want to procrastinate",
+    "phraseHint": "Users must type this phrase exactly to access the site",
+    "bypassDuration": "Bypass Duration (minutes)",
+    "bypassHint": "After completing friction, access is granted for this duration"
+  },
+  "pomodoroSettings": {
+    "tabTitle": "Pomodoro",
+    "durationsTitle": "Timer Durations",
+    "durationsDesc": "Customize your focus and break intervals",
+    "behaviorTitle": "Behavior",
+    "behaviorDesc": "Customize how the timer behaves",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "sessionsUntilLong": "Sessions until long break",
+    "autoStartBreaks": "Auto-start breaks",
+    "autoStartBreaksDesc": "Automatically start break timer when work session ends",
+    "autoStartWork": "Auto-start work sessions",
+    "autoStartWorkDesc": "Automatically start work timer when break ends",
+    "blockDuringWork": "Block during work sessions",
+    "blockDuringWorkDesc": "Enable strict blocking during focus time",
+    "notifications": "Desktop notifications",
+    "notificationsDesc": "Show notifications when sessions end"
+  },
+  "blocked": {
+    "stayFocused": "Stay Focused",
+    "siteBlocked": "{site} is blocked",
+    "thisIsBlocked": "This site is blocked",
+    "dailyLimitReached": "Daily time limit reached",
+    "breathe": "Take a moment to breathe",
+    "breatheIn": "Breathe in...",
+    "hold": "Hold...",
+    "breatheOut": "Breathe out...",
+    "goBack": "Go Back"
+  },
+  "frictionOverlay": {
+    "wait": "Wait a moment...",
+    "almostThere": "Almost there...",
+    "typePhrase": "Type this phrase to continue:",
+    "continue": "Continue to Site",
+    "returnToSafety": "Return to Safety"
+  },
+  "timeLimitWidget": {
+    "timeRemaining": "Time remaining",
+    "hideWidget": "Hide widget"
+  },
+  "language": {
+    "title": "Language",
+    "auto": "Auto (Browser)",
+    "en": "English",
+    "es": "Español",
+    "zh-CN": "简体中文",
+    "pt-BR": "Português (BR)"
+  },
+  "days": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "quotes": [
+    {
+      "text": "The secret of getting ahead is getting started.",
+      "author": "Mark Twain"
+    },
+    {
+      "text": "Focus on being productive instead of busy.",
+      "author": "Tim Ferriss"
+    },
+    {
+      "text": "It's not that I'm so smart, it's just that I stay with problems longer.",
+      "author": "Albert Einstein"
+    },
+    {
+      "text": "The way to get started is to quit talking and begin doing.",
+      "author": "Walt Disney"
+    },
+    {
+      "text": "Don't watch the clock; do what it does. Keep going.",
+      "author": "Sam Levenson"
+    },
+    {
+      "text": "Your future is created by what you do today, not tomorrow.",
+      "author": "Robert Kiyosaki"
+    },
+    {
+      "text": "The only way to do great work is to love what you do.",
+      "author": "Steve Jobs"
+    },
+    {
+      "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "author": "Winston Churchill"
+    }
+  ]
+}
+

@@ -1,5 +1,6 @@
 import type { DailyTimeStats } from '../../shared/types';
 import { formatDuration } from '../../shared/utils';
+import { useTranslation } from '../../shared/i18n';
 import './TimeStats.css';
 
 interface Props {
@@ -7,6 +8,8 @@ interface Props {
 }
 
 export default function TimeStats({ stats }: Props) {
+  const { t } = useTranslation();
+  
   // Sort domains by time spent (descending)
   const sortedDomains = Object.entries(stats)
     .sort(([, a], [, b]) => b - a)
@@ -19,9 +22,9 @@ export default function TimeStats({ stats }: Props) {
     return (
       <div className="stats-empty">
         <div className="stats-empty-icon">📊</div>
-        <p className="stats-empty-title">No activity yet</p>
+        <p className="stats-empty-title">{t('stats.noActivityYet')}</p>
         <p className="stats-empty-text">
-          Start browsing and your time will be tracked here.
+          {t('stats.startBrowsing')}
         </p>
       </div>
     );
@@ -30,7 +33,7 @@ export default function TimeStats({ stats }: Props) {
   return (
     <div className="time-stats">
       <div className="stats-header">
-        <h3>Today's Activity</h3>
+        <h3>{t('stats.todaysActivity')}</h3>
         <span className="stats-total">{formatDuration(totalTime)}</span>
       </div>
       
@@ -63,4 +66,3 @@ export default function TimeStats({ stats }: Props) {
     </div>
   );
 }
-
