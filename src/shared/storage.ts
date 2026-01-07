@@ -119,6 +119,13 @@ export async function hasActiveBypass(domain: string): Promise<boolean> {
   return bypasses.some(b => b.domain === domain);
 }
 
+// Remove a bypass for a domain
+export async function removeBypass(domain: string): Promise<void> {
+  const bypasses = await getActiveBypasses();
+  const filtered = bypasses.filter(b => b.domain !== domain);
+  await chrome.storage.local.set({ [STORAGE_KEYS.ACTIVE_BYPASSES]: filtered });
+}
+
 // Check if onboarding is complete
 export async function isOnboardingComplete(): Promise<boolean> {
   const result = await chrome.storage.local.get(STORAGE_KEYS.ONBOARDING_COMPLETE);

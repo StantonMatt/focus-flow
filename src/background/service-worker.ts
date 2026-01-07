@@ -6,6 +6,7 @@ import {
   getPomodoroState,
   savePomodoroState,
   addBypass,
+  removeBypass,
   hasActiveBypass,
   getActiveBypasses,
   getTodayString
@@ -274,6 +275,12 @@ async function handleMessage(message: Message): Promise<unknown> {
       const { domain } = message.payload as { domain: string };
       const settings = await getSettings();
       await addBypass(domain, settings.friction.bypassDurationMinutes);
+      return { success: true };
+    }
+    
+    case 'CLEAR_BYPASS': {
+      const { domain } = message.payload as { domain: string };
+      await removeBypass(domain);
       return { success: true };
     }
     

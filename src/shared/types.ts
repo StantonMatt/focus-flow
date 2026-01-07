@@ -86,7 +86,8 @@ export type MessageType =
   | 'GET_POMODORO_STATE'
   | 'POMODORO_ACTION'
   | 'REQUEST_BYPASS'
-  | 'FRICTION_COMPLETED';
+  | 'FRICTION_COMPLETED'
+  | 'CLEAR_BYPASS';
 
 export interface Message {
   type: MessageType;

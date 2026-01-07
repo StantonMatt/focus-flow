@@ -11,6 +11,7 @@ let isFrictionActive = false;
 let isBlocked = false;
 let timeLimitWidget: HTMLElement | null = null;
 let timeLimitRemaining = 0;
+let bypassedDomain: string | null = null; // Track if we bypassed friction on this page
 
 // Translation function (will be initialized)
 let t: (key: string, params?: Record<string, string | number>) => string = (key) => key;
@@ -110,6 +111,10 @@ async function init() {
   
   // Listen for visibility changes
   document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  // Clear bypass when page is closed (user consciously leaves the site)
+  window.addEventListener('pagehide', handlePageHide);
+  window.addEventListener('beforeunload', handleBeforeUnload);
 }
 
 // Check if the current page should be blocked
@@ -532,6 +537,7 @@ async function initFrictionLogic(overlay: HTMLElement) {
     });
     
     isFrictionActive = false;
+    bypassedDomain = domain; // Track that we bypassed friction for this domain
     overlay.remove();
     
     // Now initialize YouTube shorts blocking if needed
@@ -584,6 +590,38 @@ function handleVisibilityChange() {
   if (document.visibilityState === 'visible' && !isBlocked && !isFrictionActive) {
     // Could add re-check logic here if needed
   }
+}
+
+// Clear bypass when page is unloaded (closed or navigated away)
+function handlePageHide(event: PageTransitionEvent) {
+  // Only clear bypass if not being cached (actual navigation/close)
+  if (!event.persisted && bypassedDomain) {
+    clearBypass();
+  }
+}
+
+function handleBeforeUnload() {
+  // Clear bypass when page is about to be unloaded
+  if (bypassedDomain) {
+    clearBypass();
+  }
+}
+
+function clearBypass() {
+  if (!bypassedDomain || !isExtensionValid()) return;
+  
+  // Use sendBeacon-style approach for reliability during page unload
+  // sendMessage may not complete during unload, so we try both
+  try {
+    sendMessage({
+      type: 'CLEAR_BYPASS',
+      payload: { domain: bypassedDomain },
+    });
+  } catch {
+    // Ignore errors during unload
+  }
+  
+  bypassedDomain = null;
 }
 
 // Start the content script
