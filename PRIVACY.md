@@ -33,8 +33,6 @@ The extension requires certain browser permissions to function:
 | Permission | Purpose |
 |------------|---------|
 | **storage** | Save your preferences and time tracking data locally |
-| **tabs** | Detect current website URL for blocking and time tracking |
-| **activeTab** | Display blocking overlays and countdown widgets |
 | **alarms** | Run the Pomodoro timer in the background |
 | **notifications** | Alert you when timer sessions end |
 | **host_permissions** | Apply site blocking and time tracking on websites |

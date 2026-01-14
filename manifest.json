@@ -5,8 +5,6 @@
   "description": "Stay focused and productive with site blocking, time tracking, and Pomodoro timer",
   "permissions": [
     "storage",
-    "tabs",
-    "activeTab",
     "alarms",
     "notifications"
   ],
