@@ -51,13 +51,27 @@
     "breakCompleteBody": "准备好继续工作了吗？"
   },
   "stats": {
+    "title": "时间统计",
     "todaysActivity": "今日活动",
     "noActivityYet": "暂无活动",
     "startBrowsing": "开始浏览，您的时间将在此记录。",
-    "weeklyOverview": "每周概览",
-    "weeklyDesc": "过去7天的浏览时间",
+    "weeklyOverview": "时间统计",
+    "weeklyDesc": "跟踪不同时间段的浏览时间",
     "noDataForDay": "当天无数据",
-    "browseToSee": "浏览网站以查看您的时间跟踪数据"
+    "browseToSee": "浏览网站以查看您的时间跟踪数据",
+    "periods": {
+      "day": "日",
+      "week": "周",
+      "month": "月",
+      "year": "年"
+    },
+    "week": "周",
+    "views": {
+      "sites": "网站",
+      "categories": "分类"
+    },
+    "categoryOther": "其他",
+    "yesterday": "昨天"
   },
   "blockedSites": {
     "title": "已拦截网站",
@@ -76,18 +90,51 @@
     "site": "个网站",
     "sites": "个网站",
     "noSitesInCategory": "此分类暂无网站",
+    "hiddenSites": "{count} 个默认网站（已隐藏以保护隐私）",
     "addSiteToCategory": "添加网站到此分类",
     "categoryNamePlaceholder": "分类名称",
     "createCategory": "创建",
-    "newCategory": "创建新分类"
+    "newCategory": "创建新分类",
+    "hidden": "隐藏",
+    "clickToReveal": "点击显示"
   },
   "categories": {
     "socialMedia": "社交媒体",
     "videoStreaming": "视频流媒体",
     "newsMedia": "新闻媒体",
     "gaming": "游戏",
+    "searchEngines": "搜索引擎",
+    "ai": "人工智能",
     "adultContent": "成人内容",
     "custom": "我的网站"
+  },
+  "statsCategories": {
+    "socialMedia": "社交媒体",
+    "videoStreaming": "视频流媒体",
+    "musicAudio": "音乐与播客",
+    "newsMedia": "新闻媒体",
+    "gaming": "游戏",
+    "searchEngines": "搜索引擎",
+    "aiTools": "AI工具",
+    "shopping": "购物",
+    "email": "电子邮件",
+    "productivity": "生产力工具",
+    "development": "开发",
+    "education": "教育",
+    "finance": "金融与银行",
+    "communication": "通讯",
+    "reference": "参考资料",
+    "forumsCommunities": "论坛与社区",
+    "sports": "体育",
+    "healthFitness": "健康与健身",
+    "travel": "旅行",
+    "foodRecipes": "美食与食谱",
+    "cloudStorage": "云存储",
+    "design": "设计",
+    "entertainment": "娱乐",
+    "jobsCareers": "招聘与职业",
+    "realEstate": "房地产",
+    "government": "政府"
   },
   "contentFilters": {
     "title": "内容过滤",
@@ -138,7 +185,13 @@
     "noSchedulesDesc": "没有时间表，拦截将一直启用。添加时间表以限制拦截到特定时间。",
     "everyDay": "每天",
     "weekdays": "工作日",
-    "weekends": "周末"
+    "weekends": "周末",
+    "defaults": {
+      "workHours": "工作时间",
+      "fullDayFocus": "全天专注",
+      "studyTime": "学习时间",
+      "eveningWindDown": "晚间放松"
+    }
   },
   "friction": {
     "title": "阻力",
@@ -148,13 +201,22 @@
     "previewWait": "等待 {seconds} 秒",
     "previewType": "输入：「{phrase}」",
     "previewAccess": "获得 {minutes} 分钟的访问权限",
-    "delayDuration": "延迟时长（秒）",
+    "previewAccessGranted": "访问已授权",
+    "previewReset": "重试",
+    "previewReady": "准备就绪！",
+    "previewClickContinue": "点击「继续访问网站」以继续",
+    "previewTypePlaceholder": "在此输入短语...",
+    "previewStayedFocused": "好选择！保持专注。",
+    "previewProcrastinating": "你屈服于分心了！",
+    "delayDuration": "延迟时长",
     "requirePhrase": "需要输入短语",
     "phraseToType": "要输入的短语",
     "phrasePlaceholder": "例如：我想拖延",
     "phraseHint": "用户必须准确输入此短语才能访问网站",
-    "bypassDuration": "绕过时长（分钟）",
-    "bypassHint": "完成阻力后，将获得此时长的访问权限"
+    "limitBypass": "限制访问时长",
+    "bypassLimitedHint": "完成阻力后，将获得 {minutes} 分钟的访问权限",
+    "bypassUnlimitedHint": "完成阻力后，将获得访问权限直到关闭标签页",
+    "bypassDuration": "访问时长"
   },
   "pomodoroSettings": {
     "tabTitle": "番茄钟",
@@ -172,7 +234,12 @@
     "blockDuringWork": "工作时段期间拦截",
     "blockDuringWorkDesc": "在专注时间启用严格拦截",
     "notifications": "桌面通知",
-    "notificationsDesc": "时段结束时显示通知"
+    "notificationsDesc": "时段结束时显示通知",
+    "overlayMode": "浮动计时器",
+    "overlayModeDesc": "在网页上显示浮动计时器",
+    "overlayNever": "从不",
+    "overlayWhenActive": "计时器运行时",
+    "overlayAlways": "始终"
   },
   "blocked": {
     "stayFocused": "保持专注",
@@ -190,7 +257,9 @@
     "almostThere": "快好了...",
     "typePhrase": "输入此短语以继续：",
     "continue": "继续访问网站",
-    "returnToSafety": "返回安全"
+    "returnToSafety": "返回安全",
+    "explanation": "此网站在您的阻力列表中，帮助您保持专注。",
+    "openSettings": "管理拦截网站"
   },
   "timeLimitWidget": {
     "timeRemaining": "剩余时间",

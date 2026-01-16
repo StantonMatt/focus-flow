@@ -21,6 +21,14 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
     endTime: '17:00',
   });
   
+  // Get schedule display name (translated if nameKey exists)
+  const getScheduleName = (schedule: Schedule): string => {
+    if (schedule.nameKey) {
+      return t(schedule.nameKey);
+    }
+    return schedule.name;
+  };
+  
   const resetForm = () => {
     setFormData({
       name: '',
@@ -71,7 +79,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
   
   const handleEdit = (schedule: Schedule) => {
     setFormData({
-      name: schedule.name,
+      name: getScheduleName(schedule),
       days: schedule.days,
       startTime: schedule.startTime,
       endTime: schedule.endTime,
@@ -200,7 +208,7 @@ export default function SchedulesSection({ schedules, onUpdate }: Props) {
                 />
                 
                 <div className="item-card-content">
-                  <div className="item-card-title">{schedule.name}</div>
+                  <div className="item-card-title">{getScheduleName(schedule)}</div>
                   <div className="item-card-subtitle">
                     {formatDays(schedule.days)} • {schedule.startTime} - {schedule.endTime}
                   </div>

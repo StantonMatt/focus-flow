@@ -8,6 +8,7 @@ export interface BlockedSite {
   mode: BlockMode;
   dailyLimitMinutes?: number; // Only used for 'time-limit' mode
   enabled: boolean;
+  hidden?: boolean;          // If true, site is not displayed in UI (used for default adult content)
 }
 
 // Category of blocked sites
@@ -26,10 +27,12 @@ export interface SiteCategory {
 export interface Schedule {
   id: string;
   name: string;
+  nameKey?: string;          // Optional i18n key for default schedule names
   days: number[];            // 0-6 (Sunday-Saturday)
   startTime: string;         // "HH:MM" format, e.g., "09:00"
   endTime: string;           // "HH:MM" format, e.g., "17:00"
   enabled: boolean;
+  isDefault?: boolean;       // Mark as default schedule (can't be deleted)
 }
 
 // Friction settings
@@ -38,7 +41,11 @@ export interface FrictionSettings {
   requirePhrase: boolean;    // Whether to require typing a phrase
   phrase: string;            // The phrase to type
   bypassDurationMinutes: number; // How long the bypass lasts
+  bypassLimited: boolean;    // If false, bypass lasts until tab closes
 }
+
+// Pomodoro overlay display mode
+export type PomodoroOverlayMode = 'never' | 'whenActive' | 'always';
 
 // Pomodoro settings
 export interface PomodoroSettings {
@@ -50,6 +57,7 @@ export interface PomodoroSettings {
   autoStartWork: boolean;
   blockDuringWork: boolean;  // Auto-enable blocking during work sessions
   notificationsEnabled: boolean;
+  overlayMode: PomodoroOverlayMode; // When to show floating timer widget
 }
 
 // Pomodoro timer state
@@ -128,7 +136,8 @@ export type MessageType =
   | 'POMODORO_ACTION'
   | 'REQUEST_BYPASS'
   | 'FRICTION_COMPLETED'
-  | 'CLEAR_BYPASS';
+  | 'CLEAR_BYPASS'
+  | 'OPEN_OPTIONS';
 
 export interface Message {
   type: MessageType;

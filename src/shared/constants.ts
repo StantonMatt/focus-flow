@@ -6,6 +6,7 @@ export const DEFAULT_FRICTION: FrictionSettings = {
   requirePhrase: true,
   phrase: 'I want to procrastinate',
   bypassDurationMinutes: 15,
+  bypassLimited: false, // By default, bypass lasts until tab closes
 };
 
 // Default Pomodoro settings
@@ -14,20 +15,32 @@ export const DEFAULT_POMODORO: PomodoroSettings = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   sessionsUntilLongBreak: 4,
-  autoStartBreaks: false,
-  autoStartWork: false,
+  autoStartBreaks: true,  // Auto-start breaks by default
+  autoStartWork: true,    // Auto-start work by default
   blockDuringWork: true,
   notificationsEnabled: true,
+  overlayMode: 'never',   // Don't show floating widget by default
 };
 
 // Helper to create a site entry
-const createSite = (id: string, pattern: string, mode: 'block' | 'friction' | 'time-limit' = 'friction', dailyLimitMinutes?: number): BlockedSite => ({
+const createSite = (
+  id: string, 
+  pattern: string, 
+  mode: 'block' | 'friction' | 'time-limit' = 'friction', 
+  dailyLimitMinutes?: number,
+  hidden?: boolean
+): BlockedSite => ({
   id,
   pattern,
   mode,
   enabled: true,
   dailyLimitMinutes,
+  hidden,
 });
+
+// Helper for hidden adult content sites
+const createHiddenSite = (id: string, pattern: string): BlockedSite => 
+  createSite(id, pattern, 'block', undefined, true);
 
 // Default site categories with preset sites
 export const DEFAULT_CATEGORIES: SiteCategory[] = [
@@ -36,7 +49,7 @@ export const DEFAULT_CATEGORIES: SiteCategory[] = [
     name: 'Social Media',
     nameKey: 'categories.socialMedia',
     icon: '📱',
-    enabled: false, // Users opt-in
+    enabled: true, // Enabled by default
     isCustom: false,
     sites: [
       createSite('facebook', 'facebook.com', 'friction'),
@@ -48,6 +61,16 @@ export const DEFAULT_CATEGORIES: SiteCategory[] = [
       createSite('linkedin', 'linkedin.com', 'friction'),
       createSite('reddit', 'reddit.com', 'time-limit', 30),
       createSite('threads', 'threads.net', 'friction'),
+      createSite('pinterest', 'pinterest.com', 'friction'),
+      createSite('tumblr', 'tumblr.com', 'friction'),
+      createSite('discord', 'discord.com', 'friction'),
+      createSite('mastodon', 'mastodon.social', 'friction'),
+      createSite('bluesky', 'bsky.app', 'friction'),
+      createSite('whatsapp', 'web.whatsapp.com', 'friction'),
+      createSite('telegram', 'web.telegram.org', 'friction'),
+      createSite('bereal', 'bereal.com', 'friction'),
+      createSite('wechat', 'wechat.com', 'friction'),
+      createSite('vk', 'vk.com', 'friction'),
     ],
   },
   {
@@ -55,16 +78,127 @@ export const DEFAULT_CATEGORIES: SiteCategory[] = [
     name: 'Video Streaming',
     nameKey: 'categories.videoStreaming',
     icon: '📺',
-    enabled: false,
+    enabled: true, // Enabled by default
     isCustom: false,
     sites: [
-      createSite('youtube', 'youtube.com', 'time-limit', 60),
+      createSite('youtube', 'youtube.com', 'friction'),
       createSite('netflix', 'netflix.com', 'friction'),
       createSite('twitch', 'twitch.tv', 'friction'),
       createSite('hulu', 'hulu.com', 'friction'),
       createSite('disneyplus', 'disneyplus.com', 'friction'),
       createSite('primevideo', 'primevideo.com', 'friction'),
       createSite('hbomax', 'max.com', 'friction'),
+      createSite('crunchyroll', 'crunchyroll.com', 'friction'),
+      createSite('peacock', 'peacocktv.com', 'friction'),
+      createSite('paramountplus', 'paramountplus.com', 'friction'),
+      createSite('appletv', 'tv.apple.com', 'friction'),
+      createSite('vimeo', 'vimeo.com', 'friction'),
+      createSite('dailymotion', 'dailymotion.com', 'friction'),
+      createSite('plutotv', 'pluto.tv', 'friction'),
+      createSite('tubi', 'tubitv.com', 'friction'),
+      createSite('roku', 'therokuchannel.roku.com', 'friction'),
+    ],
+  },
+  {
+    id: 'gaming',
+    name: 'Gaming',
+    nameKey: 'categories.gaming',
+    icon: '🎮',
+    enabled: true, // Enabled by default
+    isCustom: false,
+    sites: [
+      createSite('steam', 'store.steampowered.com', 'friction'),
+      createSite('epicgames', 'epicgames.com', 'friction'),
+      createSite('roblox', 'roblox.com', 'block'),
+      createSite('itch', 'itch.io', 'friction'),
+      createSite('gog', 'gog.com', 'friction'),
+      createSite('xbox', 'xbox.com', 'friction'),
+      createSite('playstation', 'playstation.com', 'friction'),
+      createSite('nintendo', 'nintendo.com', 'friction'),
+      createSite('ea', 'ea.com', 'friction'),
+      createSite('ubisoft', 'ubisoft.com', 'friction'),
+      createSite('blizzard', 'blizzard.com', 'friction'),
+      createSite('riotgames', 'riotgames.com', 'friction'),
+      createSite('chess', 'chess.com', 'time-limit', 30),
+      createSite('lichess', 'lichess.org', 'time-limit', 30),
+      createSite('poki', 'poki.com', 'block'),
+      createSite('crazygames', 'crazygames.com', 'block'),
+      createSite('miniclip', 'miniclip.com', 'block'),
+      createSite('newgrounds', 'newgrounds.com', 'friction'),
+      createSite('kongregate', 'kongregate.com', 'friction'),
+    ],
+  },
+  {
+    id: 'adult-content',
+    name: 'Adult Content',
+    nameKey: 'categories.adultContent',
+    icon: '🔞',
+    enabled: true, // Enabled by default
+    isCustom: false,
+    sites: [
+      // All default adult content sites are hidden for privacy
+      // Users can add their own sites which will be visible
+      createHiddenSite('ph', 'pornhub.com'),
+      createHiddenSite('xv', 'xvideos.com'),
+      createHiddenSite('xnxx', 'xnxx.com'),
+      createHiddenSite('xh', 'xhamster.com'),
+      createHiddenSite('of', 'onlyfans.com'),
+      createHiddenSite('redtube', 'redtube.com'),
+      createHiddenSite('youporn', 'youporn.com'),
+      createHiddenSite('tube8', 'tube8.com'),
+      createHiddenSite('spankbang', 'spankbang.com'),
+      createHiddenSite('eporner', 'eporner.com'),
+      createHiddenSite('tnaflix', 'tnaflix.com'),
+      createHiddenSite('pornone', 'pornone.com'),
+      createHiddenSite('thumbzilla', 'thumbzilla.com'),
+      createHiddenSite('xtube', 'xtube.com'),
+      createHiddenSite('beeg', 'beeg.com'),
+      createHiddenSite('porntrex', 'porntrex.com'),
+      createHiddenSite('hqporner', 'hqporner.com'),
+      createHiddenSite('daftsex', 'daftsex.com'),
+      createHiddenSite('drtuber', 'drtuber.com'),
+      createHiddenSite('txxx', 'txxx.com'),
+      createHiddenSite('porn300', 'porn300.com'),
+      createHiddenSite('porngo', 'porngo.com'),
+      createHiddenSite('4tube', '4tube.com'),
+      createHiddenSite('porndig', 'porndig.com'),
+      createHiddenSite('vporn', 'vporn.com'),
+      createHiddenSite('fuq', 'fuq.com'),
+      createHiddenSite('sunporno', 'sunporno.com'),
+      createHiddenSite('tubegalore', 'tubegalore.com'),
+      createHiddenSite('anyporn', 'anyporn.com'),
+      createHiddenSite('gotporn', 'gotporn.com'),
+      // Image/forum sites
+      createHiddenSite('reddit-nsfw', 'reddit.com/r/nsfw'),
+      createHiddenSite('reddit-gonewild', 'reddit.com/r/gonewild'),
+      createHiddenSite('imgur-nsfw', 'imgur.com/r/nsfw'),
+      // Cam sites
+      createHiddenSite('chaturbate', 'chaturbate.com'),
+      createHiddenSite('stripchat', 'stripchat.com'),
+      createHiddenSite('bongacams', 'bongacams.com'),
+      createHiddenSite('cam4', 'cam4.com'),
+      createHiddenSite('camsoda', 'camsoda.com'),
+      createHiddenSite('myfreecams', 'myfreecams.com'),
+      createHiddenSite('livejasmin', 'livejasmin.com'),
+      createHiddenSite('flirt4free', 'flirt4free.com'),
+      createHiddenSite('streamate', 'streamate.com'),
+      // Hentai/animated
+      createHiddenSite('hentaihaven', 'hentaihaven.xxx'),
+      createHiddenSite('hanime', 'hanime.tv'),
+      createHiddenSite('nhentai', 'nhentai.net'),
+      createHiddenSite('rule34', 'rule34.xxx'),
+      createHiddenSite('e621', 'e621.net'),
+      createHiddenSite('gelbooru', 'gelbooru.com'),
+      createHiddenSite('danbooru', 'danbooru.donmai.us'),
+      // Erotic stories/literature
+      createHiddenSite('literotica', 'literotica.com'),
+      createHiddenSite('sexstories', 'sexstories.com'),
+      // Dating/hookup apps
+      createHiddenSite('tinder', 'tinder.com'),
+      createHiddenSite('grindr', 'grindr.com'),
+      createHiddenSite('ashleymadison', 'ashleymadison.com'),
+      createHiddenSite('adultfriendfinder', 'adultfriendfinder.com'),
+      createHiddenSite('fling', 'fling.com'),
     ],
   },
   {
@@ -81,104 +215,123 @@ export const DEFAULT_CATEGORIES: SiteCategory[] = [
       createSite('nytimes', 'nytimes.com', 'friction'),
       createSite('washingtonpost', 'washingtonpost.com', 'friction'),
       createSite('theguardian', 'theguardian.com', 'friction'),
+      createSite('reuters', 'reuters.com', 'friction'),
+      createSite('apnews', 'apnews.com', 'friction'),
+      createSite('msnbc', 'msnbc.com', 'friction'),
+      createSite('nbcnews', 'nbcnews.com', 'friction'),
+      createSite('abcnews', 'abcnews.go.com', 'friction'),
+      createSite('cbsnews', 'cbsnews.com', 'friction'),
+      createSite('bloomberg', 'bloomberg.com', 'friction'),
+      createSite('wsj', 'wsj.com', 'friction'),
+      createSite('usatoday', 'usatoday.com', 'friction'),
+      createSite('npr', 'npr.org', 'friction'),
+      createSite('dailymail', 'dailymail.co.uk', 'friction'),
+      createSite('huffpost', 'huffpost.com', 'friction'),
+      createSite('vice', 'vice.com', 'friction'),
+      createSite('buzzfeed', 'buzzfeed.com', 'friction'),
     ],
   },
   {
-    id: 'gaming',
-    name: 'Gaming',
-    nameKey: 'categories.gaming',
-    icon: '🎮',
+    id: 'search-engines',
+    name: 'Search Engines',
+    nameKey: 'categories.searchEngines',
+    icon: '🔍',
     enabled: false,
     isCustom: false,
     sites: [
-      createSite('steam', 'store.steampowered.com', 'friction'),
-      createSite('epicgames', 'epicgames.com', 'friction'),
-      createSite('roblox', 'roblox.com', 'block'),
-      createSite('itch', 'itch.io', 'friction'),
-      createSite('gog', 'gog.com', 'friction'),
+      createSite('google', 'google.com', 'friction'),
+      createSite('bing', 'bing.com', 'friction'),
+      createSite('duckduckgo', 'duckduckgo.com', 'friction'),
+      createSite('yahoo', 'yahoo.com', 'friction'),
+      createSite('baidu', 'baidu.com', 'friction'),
+      createSite('yandex', 'yandex.com', 'friction'),
+      createSite('ecosia', 'ecosia.org', 'friction'),
+      createSite('startpage', 'startpage.com', 'friction'),
+      createSite('brave-search', 'search.brave.com', 'friction'),
     ],
   },
   {
-    id: 'adult-content',
-    name: 'Adult Content',
-    nameKey: 'categories.adultContent',
-    icon: '🔞',
+    id: 'ai',
+    name: 'AI',
+    nameKey: 'categories.ai',
+    icon: '🤖',
     enabled: false,
     isCustom: false,
     sites: [
-      // Major sites
-      createSite('ph', 'pornhub.com', 'block'),
-      createSite('xv', 'xvideos.com', 'block'),
-      createSite('xnxx', 'xnxx.com', 'block'),
-      createSite('xh', 'xhamster.com', 'block'),
-      createSite('of', 'onlyfans.com', 'block'),
-      createSite('redtube', 'redtube.com', 'block'),
-      createSite('youporn', 'youporn.com', 'block'),
-      createSite('tube8', 'tube8.com', 'block'),
-      createSite('spankbang', 'spankbang.com', 'block'),
-      createSite('eporner', 'eporner.com', 'block'),
-      createSite('tnaflix', 'tnaflix.com', 'block'),
-      createSite('pornone', 'pornone.com', 'block'),
-      createSite('thumbzilla', 'thumbzilla.com', 'block'),
-      createSite('xtube', 'xtube.com', 'block'),
-      createSite('beeg', 'beeg.com', 'block'),
-      createSite('porntrex', 'porntrex.com', 'block'),
-      createSite('hqporner', 'hqporner.com', 'block'),
-      createSite('daftsex', 'daftsex.com', 'block'),
-      createSite('drtuber', 'drtuber.com', 'block'),
-      createSite('txxx', 'txxx.com', 'block'),
-      createSite('porn300', 'porn300.com', 'block'),
-      createSite('porngo', 'porngo.com', 'block'),
-      createSite('4tube', '4tube.com', 'block'),
-      createSite('porndig', 'porndig.com', 'block'),
-      createSite('vporn', 'vporn.com', 'block'),
-      createSite('fuq', 'fuq.com', 'block'),
-      createSite('sunporno', 'sunporno.com', 'block'),
-      createSite('tubegalore', 'tubegalore.com', 'block'),
-      createSite('anyporn', 'anyporn.com', 'block'),
-      createSite('gotporn', 'gotporn.com', 'block'),
-      // Image/forum sites
-      createSite('reddit-nsfw', 'reddit.com/r/nsfw', 'block'),
-      createSite('reddit-gonewild', 'reddit.com/r/gonewild', 'block'),
-      createSite('imgur-nsfw', 'imgur.com/r/nsfw', 'block'),
-      // Cam sites
-      createSite('chaturbate', 'chaturbate.com', 'block'),
-      createSite('stripchat', 'stripchat.com', 'block'),
-      createSite('bongacams', 'bongacams.com', 'block'),
-      createSite('cam4', 'cam4.com', 'block'),
-      createSite('camsoda', 'camsoda.com', 'block'),
-      createSite('myfreecams', 'myfreecams.com', 'block'),
-      createSite('livejasmin', 'livejasmin.com', 'block'),
-      createSite('flirt4free', 'flirt4free.com', 'block'),
-      createSite('streamate', 'streamate.com', 'block'),
-      // Hentai/animated
-      createSite('hentaihaven', 'hentaihaven.xxx', 'block'),
-      createSite('hanime', 'hanime.tv', 'block'),
-      createSite('nhentai', 'nhentai.net', 'block'),
-      createSite('rule34', 'rule34.xxx', 'block'),
-      createSite('e621', 'e621.net', 'block'),
-      createSite('gelbooru', 'gelbooru.com', 'block'),
-      createSite('danbooru', 'danbooru.donmai.us', 'block'),
-      // Erotic stories/literature
-      createSite('literotica', 'literotica.com', 'block'),
-      createSite('sexstories', 'sexstories.com', 'block'),
-      // Dating/hookup apps
-      createSite('tinder', 'tinder.com', 'block'),
-      createSite('grindr', 'grindr.com', 'block'),
-      createSite('ashleymadison', 'ashleymadison.com', 'block'),
-      createSite('adultfriendfinder', 'adultfriendfinder.com', 'block'),
-      createSite('fling', 'fling.com', 'block'),
+      createSite('openai', 'openai.com', 'friction'),
+      createSite('chatgpt', 'chatgpt.com', 'friction'),
+      createSite('claude', 'claude.ai', 'friction'),
+      createSite('anthropic', 'anthropic.com', 'friction'),
+      createSite('gemini', 'gemini.google.com', 'friction'),
+      createSite('perplexity', 'perplexity.ai', 'friction'),
+      createSite('copilot', 'copilot.microsoft.com', 'friction'),
+      createSite('poe', 'poe.com', 'friction'),
+      createSite('t3chat', 't3.chat', 'friction'),
+      createSite('character-ai', 'character.ai', 'friction'),
+      createSite('midjourney', 'midjourney.com', 'friction'),
+      createSite('huggingface', 'huggingface.co', 'friction'),
+      createSite('replicate', 'replicate.com', 'friction'),
+      createSite('stability-ai', 'stability.ai', 'friction'),
+      createSite('you', 'you.com', 'friction'),
+      createSite('deepl', 'deepl.com', 'friction'),
+      createSite('runway', 'runwayml.com', 'friction'),
+      createSite('leonardo', 'leonardo.ai', 'friction'),
+      createSite('writesonic', 'writesonic.com', 'friction'),
+      createSite('jasper', 'jasper.ai', 'friction'),
+      createSite('copy-ai', 'copy.ai', 'friction'),
+      createSite('grok', 'x.com/i/grok', 'friction'),
     ],
   },
 ];
 
-// Default schedules (empty - user creates their own with localized names)
-export const DEFAULT_SCHEDULES: Schedule[] = [];
+// Default schedules - preset schedules users can enable
+export const DEFAULT_SCHEDULES: Schedule[] = [
+  {
+    id: 'work-hours',
+    name: 'Work Hours',
+    nameKey: 'schedules.defaults.workHours',
+    days: [1, 2, 3, 4, 5], // Monday-Friday
+    startTime: '09:00',
+    endTime: '17:00',
+    enabled: false,
+    isDefault: true,
+  },
+  {
+    id: 'full-day-focus',
+    name: 'Full Day Focus',
+    nameKey: 'schedules.defaults.fullDayFocus',
+    days: [0, 1, 2, 3, 4, 5, 6], // Every day
+    startTime: '08:00',
+    endTime: '22:00',
+    enabled: false,
+    isDefault: true,
+  },
+  {
+    id: 'study-time',
+    name: 'Study Time',
+    nameKey: 'schedules.defaults.studyTime',
+    days: [1, 2, 3, 4, 5, 6], // Monday-Saturday
+    startTime: '09:00',
+    endTime: '21:00',
+    enabled: false,
+    isDefault: true,
+  },
+  {
+    id: 'evening-wind-down',
+    name: 'Evening Wind Down',
+    nameKey: 'schedules.defaults.eveningWindDown',
+    days: [0, 1, 2, 3, 4, 5, 6], // Every day
+    startTime: '20:00',
+    endTime: '23:00',
+    enabled: false,
+    isDefault: true,
+  },
+];
 
 // Default content filters (all disabled except YouTube Shorts which was previously enabled by default)
 export const DEFAULT_CONTENT_FILTERS: ContentFilters = {
   // YouTube
-  youtubeShorts: true,  // Enabled by default (was blockYouTubeShorts)
+  youtubeShorts: false,  // All filters off by default
   youtubeRecommendations: false,
   youtubeComments: false,
   // Instagram

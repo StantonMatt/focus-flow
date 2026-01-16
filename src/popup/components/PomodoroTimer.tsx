@@ -1,4 +1,4 @@
-import type { PomodoroState, PomodoroSettings } from '../../shared/types';
+import type { PomodoroState, PomodoroSettings, PomodoroOverlayMode } from '../../shared/types';
 import { formatTime } from '../../shared/utils';
 import { useTranslation } from '../../shared/i18n';
 import './PomodoroTimer.css';
@@ -7,10 +7,25 @@ interface Props {
   state: PomodoroState;
   settings: PomodoroSettings;
   onAction: (action: 'start' | 'pause' | 'reset' | 'skip') => void;
+  onSettingsUpdate: (settings: PomodoroSettings) => void;
 }
 
-export default function PomodoroTimer({ state, settings, onAction }: Props) {
+export default function PomodoroTimer({ state, settings, onAction, onSettingsUpdate }: Props) {
   const { t } = useTranslation();
+  
+  const handleDurationChange = (field: 'workDurationMinutes' | 'shortBreakMinutes', delta: number) => {
+    const currentValue = settings[field];
+    const newValue = Math.max(1, Math.min(120, currentValue + delta));
+    onSettingsUpdate({ ...settings, [field]: newValue });
+  };
+  
+  const handleToggle = (field: 'autoStartBreaks' | 'autoStartWork') => {
+    onSettingsUpdate({ ...settings, [field]: !settings[field] });
+  };
+  
+  const handleOverlayModeChange = (mode: PomodoroOverlayMode) => {
+    onSettingsUpdate({ ...settings, overlayMode: mode });
+  };
   
   const getPhaseLabel = () => {
     switch (state.phase) {
@@ -152,20 +167,89 @@ export default function PomodoroTimer({ state, settings, onAction }: Props) {
         </button>
       </div>
       
+      {/* Duration info with +/- controls */}
       <div className="timer-info">
-        <div className="timer-info-item">
-          <span className="timer-info-value">{settings.workDurationMinutes}{t('common.minutes')}</span>
+        <div className="timer-info-item with-controls">
+          <div className="duration-control">
+            <button 
+              className="duration-btn"
+              onClick={() => handleDurationChange('workDurationMinutes', -1)}
+              disabled={state.isRunning}
+            >−</button>
+            <span className="timer-info-value">{settings.workDurationMinutes}{t('common.minutes')}</span>
+            <button 
+              className="duration-btn"
+              onClick={() => handleDurationChange('workDurationMinutes', 1)}
+              disabled={state.isRunning}
+            >+</button>
+          </div>
           <span className="timer-info-label">{t('pomodoro.work')}</span>
         </div>
         <div className="timer-info-divider" />
-        <div className="timer-info-item">
-          <span className="timer-info-value">{settings.shortBreakMinutes}{t('common.minutes')}</span>
+        <div className="timer-info-item with-controls">
+          <div className="duration-control">
+            <button 
+              className="duration-btn"
+              onClick={() => handleDurationChange('shortBreakMinutes', -1)}
+              disabled={state.isRunning}
+            >−</button>
+            <span className="timer-info-value">{settings.shortBreakMinutes}{t('common.minutes')}</span>
+            <button 
+              className="duration-btn"
+              onClick={() => handleDurationChange('shortBreakMinutes', 1)}
+              disabled={state.isRunning}
+            >+</button>
+          </div>
           <span className="timer-info-label">{t('pomodoro.break')}</span>
         </div>
         <div className="timer-info-divider" />
         <div className="timer-info-item">
           <span className="timer-info-value">{state.todayPomodoros}</span>
           <span className="timer-info-label">{t('common.done')}</span>
+        </div>
+      </div>
+      
+      {/* Quick settings - always visible */}
+      <div className="timer-quick-settings">
+        <div className="quick-toggles">
+          <label className="quick-toggle">
+            <span>{t('pomodoroSettings.autoStartBreaks')}</span>
+            <button 
+              className={`toggle toggle-sm ${settings.autoStartBreaks ? 'active' : ''}`}
+              onClick={() => handleToggle('autoStartBreaks')}
+            />
+          </label>
+          <label className="quick-toggle">
+            <span>{t('pomodoroSettings.autoStartWork')}</span>
+            <button 
+              className={`toggle toggle-sm ${settings.autoStartWork ? 'active' : ''}`}
+              onClick={() => handleToggle('autoStartWork')}
+            />
+          </label>
+        </div>
+        
+        <div className="overlay-mode-selector">
+          <span className="overlay-mode-label">{t('pomodoroSettings.overlayMode')}:</span>
+          <div className="overlay-mode-buttons">
+            <button 
+              className={`overlay-mode-btn ${settings.overlayMode === 'never' ? 'active' : ''}`}
+              onClick={() => handleOverlayModeChange('never')}
+            >
+              {t('pomodoroSettings.overlayNever')}
+            </button>
+            <button 
+              className={`overlay-mode-btn ${settings.overlayMode === 'whenActive' ? 'active' : ''}`}
+              onClick={() => handleOverlayModeChange('whenActive')}
+            >
+              {t('pomodoroSettings.overlayWhenActive')}
+            </button>
+            <button 
+              className={`overlay-mode-btn ${settings.overlayMode === 'always' ? 'active' : ''}`}
+              onClick={() => handleOverlayModeChange('always')}
+            >
+              {t('pomodoroSettings.overlayAlways')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

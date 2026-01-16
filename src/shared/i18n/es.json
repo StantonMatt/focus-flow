@@ -51,13 +51,27 @@
     "breakCompleteBody": "¿Listo para volver al trabajo?"
   },
   "stats": {
+    "title": "Estadísticas de Tiempo",
     "todaysActivity": "Actividad de Hoy",
     "noActivityYet": "Sin actividad aún",
     "startBrowsing": "Comienza a navegar y tu tiempo será registrado aquí.",
-    "weeklyOverview": "Resumen Semanal",
-    "weeklyDesc": "Tu tiempo de navegación en los últimos 7 días",
+    "weeklyOverview": "Estadísticas de Tiempo",
+    "weeklyDesc": "Rastrea tu tiempo de navegación en diferentes períodos",
     "noDataForDay": "Sin datos para este día",
-    "browseToSee": "Navega por algunos sitios web para ver tus datos de tiempo"
+    "browseToSee": "Navega por algunos sitios web para ver tus datos de tiempo",
+    "periods": {
+      "day": "Día",
+      "week": "Semana",
+      "month": "Mes",
+      "year": "Año"
+    },
+    "week": "Semana",
+    "views": {
+      "sites": "Sitios",
+      "categories": "Categorías"
+    },
+    "categoryOther": "Otros",
+    "yesterday": "Ayer"
   },
   "blockedSites": {
     "title": "Sitios Bloqueados",
@@ -76,18 +90,51 @@
     "site": "sitio",
     "sites": "sitios",
     "noSitesInCategory": "Sin sitios en esta categoría aún",
+    "hiddenSites": "{count} sitios predeterminados (ocultos por privacidad)",
     "addSiteToCategory": "Agregar sitio a esta categoría",
     "categoryNamePlaceholder": "Nombre de categoría",
     "createCategory": "Crear",
-    "newCategory": "Crear Nueva Categoría"
+    "newCategory": "Crear Nueva Categoría",
+    "hidden": "Oculto",
+    "clickToReveal": "Clic para revelar"
   },
   "categories": {
     "socialMedia": "Redes Sociales",
     "videoStreaming": "Streaming de Video",
     "newsMedia": "Noticias y Medios",
     "gaming": "Juegos",
+    "searchEngines": "Motores de Búsqueda",
+    "ai": "IA",
     "adultContent": "Contenido Adulto",
     "custom": "Mis Sitios"
+  },
+  "statsCategories": {
+    "socialMedia": "Redes Sociales",
+    "videoStreaming": "Video y Streaming",
+    "musicAudio": "Música y Audio",
+    "newsMedia": "Noticias y Medios",
+    "gaming": "Juegos",
+    "searchEngines": "Motores de Búsqueda",
+    "aiTools": "Herramientas IA",
+    "shopping": "Compras",
+    "email": "Correo Electrónico",
+    "productivity": "Productividad",
+    "development": "Desarrollo",
+    "education": "Educación",
+    "finance": "Finanzas y Banca",
+    "communication": "Comunicación",
+    "reference": "Referencia",
+    "forumsCommunities": "Foros y Comunidades",
+    "sports": "Deportes",
+    "healthFitness": "Salud y Fitness",
+    "travel": "Viajes",
+    "foodRecipes": "Comida y Recetas",
+    "cloudStorage": "Almacenamiento en la Nube",
+    "design": "Diseño",
+    "entertainment": "Entretenimiento",
+    "jobsCareers": "Empleo y Carreras",
+    "realEstate": "Bienes Raíces",
+    "government": "Gobierno"
   },
   "contentFilters": {
     "title": "Filtros de Contenido",
@@ -138,7 +185,13 @@
     "noSchedulesDesc": "Sin horarios, el bloqueo está siempre activo. Agrega un horario para limitar el bloqueo a momentos específicos.",
     "everyDay": "Todos los días",
     "weekdays": "Días de semana",
-    "weekends": "Fines de semana"
+    "weekends": "Fines de semana",
+    "defaults": {
+      "workHours": "Horas de Trabajo",
+      "fullDayFocus": "Enfoque Todo el Día",
+      "studyTime": "Tiempo de Estudio",
+      "eveningWindDown": "Descanso Nocturno"
+    }
   },
   "friction": {
     "title": "Fricción",
@@ -148,13 +201,22 @@
     "previewWait": "Esperar {seconds} segundos",
     "previewType": "Escribir: \"{phrase}\"",
     "previewAccess": "Acceso otorgado por {minutes} minutos",
-    "delayDuration": "Duración del Retraso (segundos)",
+    "previewAccessGranted": "Acceso Otorgado",
+    "previewReset": "Intentar de Nuevo",
+    "previewReady": "¡Listo!",
+    "previewClickContinue": "Haz clic en \"Continuar al Sitio\" para proceder",
+    "previewTypePlaceholder": "Escribe la frase aquí...",
+    "previewStayedFocused": "¡Buena elección! Te mantuviste enfocado.",
+    "previewProcrastinating": "¡Cediste a la distracción!",
+    "delayDuration": "Duración del Retraso",
     "requirePhrase": "Requerir escribir una frase",
     "phraseToType": "Frase a Escribir",
     "phrasePlaceholder": "ej., Quiero procrastinar",
     "phraseHint": "Los usuarios deben escribir esta frase exactamente para acceder al sitio",
-    "bypassDuration": "Duración del Acceso (minutos)",
-    "bypassHint": "Después de completar la fricción, el acceso se otorga por esta duración"
+    "limitBypass": "Limitar duración del acceso",
+    "bypassLimitedHint": "Después de completar la fricción, el acceso se otorga por {minutes} minutos",
+    "bypassUnlimitedHint": "Después de completar la fricción, el acceso se otorga hasta cerrar la pestaña",
+    "bypassDuration": "Duración del Acceso"
   },
   "pomodoroSettings": {
     "tabTitle": "Pomodoro",
@@ -172,7 +234,12 @@
     "blockDuringWork": "Bloquear durante sesiones de trabajo",
     "blockDuringWorkDesc": "Activar bloqueo estricto durante el tiempo de enfoque",
     "notifications": "Notificaciones de escritorio",
-    "notificationsDesc": "Mostrar notificaciones cuando terminan las sesiones"
+    "notificationsDesc": "Mostrar notificaciones cuando terminan las sesiones",
+    "overlayMode": "Temporizador Flotante",
+    "overlayModeDesc": "Mostrar un temporizador flotante en las páginas web",
+    "overlayNever": "Nunca",
+    "overlayWhenActive": "Cuando el temporizador está activo",
+    "overlayAlways": "Siempre"
   },
   "blocked": {
     "stayFocused": "Mantente Enfocado",
@@ -190,7 +257,9 @@
     "almostThere": "Casi listo...",
     "typePhrase": "Escribe esta frase para continuar:",
     "continue": "Continuar al Sitio",
-    "returnToSafety": "Volver a la Seguridad"
+    "returnToSafety": "Volver a la Seguridad",
+    "explanation": "Este sitio está en tu lista de fricción para ayudarte a mantener el enfoque.",
+    "openSettings": "Administrar sitios bloqueados"
   },
   "timeLimitWidget": {
     "timeRemaining": "Tiempo restante",

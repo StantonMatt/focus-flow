@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef, useLayoutEffect, useCallback, useEffect } from 'react';
 import type { SiteCategory, BlockedSite, BlockMode } from '../../shared/types';
 import { generateId } from '../../shared/utils';
 import { useTranslation } from '../../shared/i18n';
@@ -6,6 +6,8 @@ import { useTranslation } from '../../shared/i18n';
 interface Props {
   categories: SiteCategory[];
   onUpdate: (categories: SiteCategory[]) => void;
+  highlightSite?: string | null;
+  onHighlightClear?: () => void;
 }
 
 // Site favicon component
@@ -28,7 +30,7 @@ function SiteIcon({ domain }: { domain: string }) {
   );
 }
 
-export default function BlockedSitesSection({ categories, onUpdate }: Props) {
+export default function BlockedSitesSection({ categories, onUpdate, highlightSite, onHighlightClear }: Props) {
   const { t } = useTranslation();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -38,6 +40,116 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryIcon, setNewCategoryIcon] = useState('📁');
+  const [revealedSites, setRevealedSites] = useState<Set<string>>(new Set());
+  const [highlightedSiteId, setHighlightedSiteId] = useState<string | null>(null);
+  
+  // FLIP animation refs
+  const categoryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const positionsRef = useRef<Map<string, DOMRect>>(new Map());
+  const isFirstRender = useRef(true);
+  const siteRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  
+  // Handle highlight site from URL
+  useEffect(() => {
+    if (!highlightSite) return;
+    
+    // Find the site and its category
+    for (const category of categories) {
+      const site = category.sites.find(s => 
+        highlightSite.includes(s.pattern) || s.pattern.includes(highlightSite)
+      );
+      if (site) {
+        // Expand the category
+        setExpandedCategories(prev => new Set([...prev, category.id]));
+        // If it's hidden, reveal it
+        if (site.hidden) {
+          setRevealedSites(prev => new Set([...prev, site.id]));
+        }
+        // Set the highlighted site
+        setHighlightedSiteId(site.id);
+        
+        // Scroll to site after a short delay to allow expansion
+        setTimeout(() => {
+          const siteEl = siteRefs.current.get(site.id);
+          if (siteEl) {
+            siteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+        
+        // Clear highlight after 3 seconds
+        setTimeout(() => {
+          setHighlightedSiteId(null);
+          onHighlightClear?.();
+        }, 3000);
+        
+        break;
+      }
+    }
+  }, [highlightSite, categories, onHighlightClear]);
+  
+  // Store positions before render
+  const capturePositions = useCallback(() => {
+    categoryRefs.current.forEach((el, id) => {
+      if (el) {
+        positionsRef.current.set(id, el.getBoundingClientRect());
+      }
+    });
+  }, []);
+  
+  // Animate from old positions to new positions (FLIP technique)
+  useLayoutEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
+    categoryRefs.current.forEach((el, id) => {
+      if (!el) return;
+      
+      const oldPos = positionsRef.current.get(id);
+      const newPos = el.getBoundingClientRect();
+      
+      if (oldPos) {
+        const deltaY = oldPos.top - newPos.top;
+        
+        if (Math.abs(deltaY) > 5) {
+          // Apply inverse transform
+          el.style.transform = `translateY(${deltaY}px)`;
+          el.style.transition = 'none';
+          
+          // Force reflow
+          el.offsetHeight;
+          
+          // Animate to final position
+          el.style.transform = '';
+          el.style.transition = 'transform 0.3s ease-out';
+        }
+      }
+    });
+    
+    // Clear old positions
+    positionsRef.current.clear();
+  }, [categories]);
+  
+  // Helper to get category name for sorting
+  const getCategoryNameForSort = (cat: SiteCategory): string => {
+    if (cat.nameKey) {
+      return t(cat.nameKey);
+    }
+    return cat.name;
+  };
+  
+  // Sort categories: enabled first (alphabetically), then disabled (alphabetically)
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => {
+      // First sort by enabled status (enabled comes first)
+      if (a.enabled !== b.enabled) {
+        return a.enabled ? -1 : 1;
+      }
+      // Then sort alphabetically by name
+      return getCategoryNameForSort(a).localeCompare(getCategoryNameForSort(b));
+    });
+  }, [categories, t]);
   
   // Toggle category expansion
   const toggleExpand = (categoryId: string) => {
@@ -52,6 +164,8 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
   
   // Toggle entire category enabled/disabled
   const toggleCategory = (categoryId: string) => {
+    // Capture positions before the update for FLIP animation
+    capturePositions();
     onUpdate(categories.map(cat => 
       cat.id === categoryId ? { ...cat, enabled: !cat.enabled } : cat
     ));
@@ -186,6 +300,22 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
   
   const emojiOptions = ['📱', '📺', '📰', '🎮', '🔞', '💼', '🎵', '🛒', '📧', '⭐', '📁', '🚫'];
   
+  // Toggle reveal for hidden adult content sites
+  const toggleRevealSite = (siteId: string) => {
+    const newRevealed = new Set(revealedSites);
+    if (newRevealed.has(siteId)) {
+      newRevealed.delete(siteId);
+    } else {
+      newRevealed.add(siteId);
+    }
+    setRevealedSites(newRevealed);
+  };
+  
+  // Check if a site should show as hidden (hidden prop set and not revealed)
+  const isSiteHidden = (site: BlockedSite): boolean => {
+    return site.hidden === true && !revealedSites.has(site.id);
+  };
+  
   return (
     <div>
       <div className="settings-section">
@@ -200,15 +330,25 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
         
         {/* Category Cards */}
         <div className="category-list">
-          {categories.map((category) => (
-            <div key={category.id} className={`category-card ${category.enabled ? 'enabled' : 'disabled'}`}>
+          {sortedCategories.map((category) => (
+            <div 
+              key={category.id} 
+              ref={(el) => {
+                if (el) categoryRefs.current.set(category.id, el);
+                else categoryRefs.current.delete(category.id);
+              }}
+              className={`category-card ${category.enabled ? 'enabled' : 'disabled'}`}
+            >
               {/* Category Header */}
               <div className="category-header" onClick={() => toggleExpand(category.id)}>
                 <div className="category-icon">{category.icon}</div>
                 <div className="category-info">
                   <div className="category-name">{getCategoryName(category)}</div>
                   <div className="category-count">
-                    {category.sites.length} {category.sites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}
+                    {(() => {
+                      const totalForBlocking = category.sites.length;
+                      return `${totalForBlocking} ${totalForBlocking === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
+                    })()}
                   </div>
                 </div>
                 <div className="category-actions">
@@ -244,80 +384,134 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
                       <p>{t('blockedSites.noSitesInCategory')}</p>
                     </div>
                   ) : (
-                    category.sites.map((site) => (
-                      <div key={site.id} className={`site-item ${site.enabled ? '' : 'disabled'}`}>
-                        <SiteIcon domain={site.pattern} />
-                        <div className="site-info">
-                          <span className="site-pattern">{site.pattern}</span>
-                          <span 
-                            className="mode-badge"
-                            style={{ 
-                              background: `${getModeColor(site.mode)}22`,
-                              color: getModeColor(site.mode)
-                            }}
+                    category.sites.map((site) => {
+                      const isHidden = isSiteHidden(site);
+                      
+                      // If site is hidden (adult content), show a masked row
+                      if (isHidden) {
+                        return (
+                          <div 
+                            key={site.id} 
+                            className={`site-item site-hidden ${site.enabled ? '' : 'disabled'}`}
+                            onClick={() => toggleRevealSite(site.id)}
+                            title={t('blockedSites.clickToReveal')}
                           >
-                            {getModeLabel(site.mode)}
-                          </span>
-                          {site.mode === 'time-limit' && site.dailyLimitMinutes && (
-                            <span className="limit-text">{site.dailyLimitMinutes}m</span>
-                          )}
-                        </div>
-                        
-                        {editingId === site.id ? (
-                          <div className="site-edit">
-                            <select
-                              className="form-input form-input-small"
-                              value={site.mode}
-                              onChange={(e) => updateSiteMode(category.id, site.id, e.target.value as BlockMode)}
-                            >
-                              <option value="block">{t('blockedSites.modeBlock')}</option>
-                              <option value="friction">{t('blockedSites.modeFriction')}</option>
-                              <option value="time-limit">{t('blockedSites.modeTimeLimit')}</option>
-                            </select>
-                            {site.mode === 'time-limit' && (
-                              <input
-                                type="number"
-                                className="form-input form-input-small"
-                                value={site.dailyLimitMinutes || 30}
-                                onChange={(e) => updateSiteLimit(category.id, site.id, parseInt(e.target.value) || 30)}
-                                min="1"
-                                max="480"
-                                style={{ width: '70px' }}
-                              />
-                            )}
-                            <button className="btn btn-sm btn-primary" onClick={() => setEditingId(null)}>
-                              {t('common.done')}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="site-actions">
-                            <button
-                              className={`toggle toggle-sm ${site.enabled ? 'active' : ''}`}
-                              onClick={() => toggleSite(category.id, site.id)}
-                            />
-                            <button
-                              className="btn-icon-sm"
-                              onClick={() => setEditingId(site.id)}
-                              title={t('common.edit')}
-                            >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            <div className="site-hidden-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
                               </svg>
-                            </button>
+                            </div>
+                            <div className="site-info">
+                              <span className="site-pattern site-pattern-hidden">{t('blockedSites.hidden')}</span>
+                              <span className="site-reveal-hint">{t('blockedSites.clickToReveal')}</span>
+                            </div>
+                            <div className="site-actions">
+                              <button
+                                className={`toggle toggle-sm ${site.enabled ? 'active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); toggleSite(category.id, site.id); }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Normal visible site or revealed hidden site
+                      return (
+                        <div 
+                          key={site.id} 
+                          ref={(el) => {
+                            if (el) siteRefs.current.set(site.id, el);
+                            else siteRefs.current.delete(site.id);
+                          }}
+                          className={`site-item ${site.enabled ? '' : 'disabled'} ${site.hidden ? 'site-revealed' : ''} ${highlightedSiteId === site.id ? 'highlighted' : ''}`}
+                        >
+                          {site.hidden ? (
+                            <div 
+                              className="site-revealed-icon"
+                              onClick={() => toggleRevealSite(site.id)}
+                              title={t('blockedSites.clickToReveal')}
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <SiteIcon domain={site.pattern} />
+                          )}
+                          <div className="site-info">
+                            <span className="site-pattern">{site.pattern}</span>
+                            <span 
+                              className="mode-badge"
+                              style={{ 
+                                background: `${getModeColor(site.mode)}22`,
+                                color: getModeColor(site.mode)
+                              }}
+                            >
+                              {getModeLabel(site.mode)}
+                            </span>
+                            {site.mode === 'time-limit' && site.dailyLimitMinutes && (
+                              <span className="limit-text">{site.dailyLimitMinutes}m</span>
+                            )}
+                          </div>
+                        
+                          {editingId === site.id ? (
+                            <div className="site-edit">
+                              <select
+                                className="form-input form-input-small"
+                                value={site.mode}
+                                onChange={(e) => updateSiteMode(category.id, site.id, e.target.value as BlockMode)}
+                              >
+                                <option value="block">{t('blockedSites.modeBlock')}</option>
+                                <option value="friction">{t('blockedSites.modeFriction')}</option>
+                                <option value="time-limit">{t('blockedSites.modeTimeLimit')}</option>
+                              </select>
+                              {site.mode === 'time-limit' && (
+                                <input
+                                  type="number"
+                                  className="form-input form-input-small"
+                                  value={site.dailyLimitMinutes || 30}
+                                  onChange={(e) => updateSiteLimit(category.id, site.id, parseInt(e.target.value) || 30)}
+                                  min="1"
+                                  max="480"
+                                  style={{ width: '70px' }}
+                                />
+                              )}
+                              <button className="btn btn-sm btn-primary" onClick={() => setEditingId(null)}>
+                                {t('common.done')}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="site-actions">
+                              <button
+                                className={`toggle toggle-sm ${site.enabled ? 'active' : ''}`}
+                                onClick={() => toggleSite(category.id, site.id)}
+                              />
+                              <button
+                                className="btn-icon-sm"
+                                onClick={() => setEditingId(site.id)}
+                                title={t('common.edit')}
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                              </button>
                             <button
                               className="btn-icon-sm danger"
                               onClick={() => deleteSite(category.id, site.id)}
                               title={t('common.delete')}
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M18 6L6 18M6 6l12 12" />
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                               </svg>
                             </button>
-                          </div>
-                        )}
-                      </div>
-                    ))
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
                   )}
                   
                   {/* Add site form */}
@@ -423,7 +617,8 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
           border: 1px solid var(--border);
           border-radius: 12px;
           overflow: hidden;
-          transition: all 0.2s;
+          transition: opacity 0.2s, border-color 0.2s;
+          will-change: transform;
         }
         
         .category-card.disabled {
@@ -521,6 +716,76 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
           opacity: 0.5;
         }
         
+        .site-item.highlighted {
+          animation: highlight-pulse 2s ease-out;
+          background: rgba(0, 212, 170, 0.2);
+          border: 1px solid var(--accent-primary);
+        }
+        
+        @keyframes highlight-pulse {
+          0% {
+            background: rgba(0, 212, 170, 0.4);
+            box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.3);
+          }
+          100% {
+            background: rgba(0, 212, 170, 0.1);
+            box-shadow: 0 0 0 0 rgba(0, 212, 170, 0);
+          }
+        }
+        
+        .site-item.site-hidden {
+          cursor: pointer;
+          border: 1px dashed var(--border);
+          background: var(--bg-tertiary);
+        }
+        
+        .site-item.site-hidden:hover {
+          border-color: var(--text-muted);
+        }
+        
+        .site-item.site-revealed {
+          background: rgba(0, 212, 170, 0.05);
+          border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+        
+        .site-hidden-icon {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          flex-shrink: 0;
+        }
+        
+        .site-revealed-icon {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--accent-primary);
+          flex-shrink: 0;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: opacity 0.2s;
+        }
+        
+        .site-revealed-icon:hover {
+          opacity: 1;
+        }
+        
+        .site-pattern-hidden {
+          color: var(--text-muted);
+          font-style: italic;
+        }
+        
+        .site-reveal-hint {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          opacity: 0.7;
+        }
+        
         .site-icon {
           width: 20px;
           height: 20px;
@@ -568,7 +833,11 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
         .site-actions {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 8px;
+        }
+        
+        .site-actions .btn-icon-sm + .btn-icon-sm {
+          margin-left: -6px;
         }
         
         .site-edit {
@@ -583,8 +852,14 @@ export default function BlockedSitesSection({ categories, onUpdate }: Props) {
         }
         
         .toggle-sm::after {
+          top: 2px;
+          left: 2px;
           width: 14px;
           height: 14px;
+        }
+        
+        .toggle-sm.active::after {
+          transform: translateX(14px);
         }
         
         .add-site-form {

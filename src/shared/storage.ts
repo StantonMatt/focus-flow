@@ -61,10 +61,23 @@ function migrateSettings(oldSettings: Record<string, unknown>): Settings {
   return settings;
 }
 
-// Get settings from storage
+// Get settings from storage (uses local storage due to size limits in sync)
 export async function getSettings(): Promise<Settings> {
-  const result = await chrome.storage.sync.get(STORAGE_KEYS.SETTINGS);
-  const storedSettings = result[STORAGE_KEYS.SETTINGS] as Record<string, unknown> | undefined;
+  // Try local first (new location), then sync (old location) for migration
+  let result = await chrome.storage.local.get(STORAGE_KEYS.SETTINGS);
+  let storedSettings = result[STORAGE_KEYS.SETTINGS] as Record<string, unknown> | undefined;
+  
+  // Migration from sync to local storage
+  if (!storedSettings) {
+    const syncResult = await chrome.storage.sync.get(STORAGE_KEYS.SETTINGS);
+    storedSettings = syncResult[STORAGE_KEYS.SETTINGS] as Record<string, unknown> | undefined;
+    
+    if (storedSettings) {
+      // Migrate to local storage and remove from sync
+      await chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: storedSettings });
+      await chrome.storage.sync.remove(STORAGE_KEYS.SETTINGS);
+    }
+  }
   
   if (!storedSettings) {
     return DEFAULT_SETTINGS;
@@ -85,9 +98,9 @@ export async function getSettings(): Promise<Settings> {
   return migratedSettings;
 }
 
-// Save settings to storage
+// Save settings to storage (uses local storage due to size limits in sync)
 export async function saveSettings(settings: Settings): Promise<void> {
-  await chrome.storage.sync.set({ [STORAGE_KEYS.SETTINGS]: settings });
+  await chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: settings });
 }
 
 // Update partial settings
@@ -215,6 +228,6 @@ export function onSettingsChange(callback: (settings: Settings) => void): () => 
     }
   };
   
-  chrome.storage.sync.onChanged.addListener(listener);
-  return () => chrome.storage.sync.onChanged.removeListener(listener);
+  chrome.storage.local.onChanged.addListener(listener);
+  return () => chrome.storage.local.onChanged.removeListener(listener);
 }

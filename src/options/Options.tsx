@@ -16,9 +16,32 @@ export default function Options() {
   const [activeTab, setActiveTab] = useState<Tab>('blocked');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [highlightSite, setHighlightSite] = useState<string | null>(null);
   
   useEffect(() => {
     loadSettings();
+    
+    // Parse URL hash for tab and site highlight
+    const parseHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const [tabPart, queryPart] = hash.slice(1).split('?');
+        if (tabPart && ['blocked', 'filters', 'schedules', 'friction', 'pomodoro', 'stats'].includes(tabPart)) {
+          setActiveTab(tabPart as Tab);
+        }
+        if (queryPart) {
+          const params = new URLSearchParams(queryPart);
+          const site = params.get('site');
+          if (site) {
+            setHighlightSite(site);
+          }
+        }
+      }
+    };
+    
+    parseHash();
+    window.addEventListener('hashchange', parseHash);
+    return () => window.removeEventListener('hashchange', parseHash);
   }, []);
   
   const loadSettings = async () => {
@@ -155,8 +178,9 @@ export default function Options() {
           <h1>{tabs.find(t => t.id === activeTab)?.label}</h1>
           
           <div className="header-actions">
-            {saving && <span className="save-indicator saving">{t('common.saving')}</span>}
-            {saved && <span className="save-indicator saved">✓ {t('common.saved')}</span>}
+            <span className={`save-indicator ${saving ? 'saving visible' : ''} ${saved ? 'saved visible' : ''}`}>
+              {saving ? t('common.saving') : `✓ ${t('common.saved')}`}
+            </span>
           </div>
         </header>
         
@@ -165,6 +189,8 @@ export default function Options() {
             <BlockedSitesSection 
               categories={settings.siteCategories}
               onUpdate={(categories) => saveSettings({ ...settings, siteCategories: categories })}
+              highlightSite={highlightSite}
+              onHighlightClear={() => setHighlightSite(null)}
             />
           )}
           

@@ -1,5 +1,5 @@
-import type { CheckBlockedResponse, Message, Settings } from '../shared/types';
-import { extractDomain, formatDuration } from '../shared/utils';
+import type { CheckBlockedResponse, Message, Settings, PomodoroState, PomodoroSettings } from '../shared/types';
+import { extractDomain, formatDuration, formatTime } from '../shared/utils';
 import { HEARTBEAT_INTERVAL } from '../shared/constants';
 import { getTranslator } from '../shared/i18n';
 import { initFilters } from './filters';
@@ -23,6 +23,11 @@ let isBlocked = false;
 let timeLimitWidget: HTMLElement | null = null;
 let timeLimitRemaining = 0;
 let bypassedDomain: string | null = null; // Track if we bypassed friction on this page
+
+// Pomodoro timer widget state
+let pomodoroWidget: HTMLElement | null = null;
+let pomodoroWidgetDismissed = false;
+let pomodoroPollingInterval: number | null = null;
 
 // Translation function (will be initialized)
 let t: (key: string, params?: Record<string, string | number>) => string = (key) => key;
@@ -127,6 +132,23 @@ async function init() {
     if (settings?.contentFilters) {
       initFilters(settings.contentFilters, window.location.href);
     }
+  }
+  
+  // Initialize Pomodoro timer widget (if overlay mode is enabled)
+  if (!isBlocked && !isFrictionActive) {
+    initPomodoroWidget();
+    
+    // Listen for storage changes to update widget when settings change
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'local' && changes.settings) {
+        const newSettings = changes.settings.newValue as Settings | undefined;
+        if (newSettings?.pomodoro) {
+          // Re-initialize widget with new settings
+          pomodoroWidgetDismissed = false;
+          initPomodoroWidget();
+        }
+      }
+    });
   }
   
   // Start time tracking
@@ -382,6 +404,274 @@ function makeDraggable(element: HTMLElement) {
   });
 }
 
+// Initialize Pomodoro timer widget
+async function initPomodoroWidget() {
+  if (pomodoroWidgetDismissed) return;
+  
+  // Start polling for Pomodoro state (polling handles show/hide based on settings)
+  if (!pomodoroPollingInterval) {
+    pomodoroPollingInterval = window.setInterval(updatePomodoroWidget, 1000);
+  }
+  
+  // Do an immediate update
+  updatePomodoroWidget();
+}
+
+// Update Pomodoro widget based on current state
+async function updatePomodoroWidget() {
+  if (!isExtensionValid() || pomodoroWidgetDismissed) {
+    if (pomodoroPollingInterval) {
+      clearInterval(pomodoroPollingInterval);
+      pomodoroPollingInterval = null;
+    }
+    return;
+  }
+  
+  const [settings, pomodoroState] = await Promise.all([
+    sendMessage<Settings>({ type: 'GET_SETTINGS' }),
+    sendMessage<PomodoroState>({ type: 'GET_POMODORO_STATE' }),
+  ]);
+  
+  if (!settings?.pomodoro || !pomodoroState) return;
+  
+  const overlayMode = settings.pomodoro.overlayMode || 'never';
+  
+  // Determine if widget should be shown
+  const shouldShow = 
+    overlayMode === 'always' || 
+    (overlayMode === 'whenActive' && pomodoroState.phase !== 'idle');
+  
+  if (!shouldShow) {
+    removePomodoroWidget();
+    return;
+  }
+  
+  // Create or update widget
+  if (!pomodoroWidget) {
+    createPomodoroWidget(pomodoroState, settings.pomodoro);
+  } else {
+    updatePomodoroWidgetContent(pomodoroState, settings.pomodoro);
+  }
+}
+
+// Create the Pomodoro timer widget
+function createPomodoroWidget(state: PomodoroState, settings: PomodoroSettings) {
+  if (pomodoroWidget) return;
+  
+  const hideLabel = t('timeLimitWidget.hideWidget');
+  
+  pomodoroWidget = document.createElement('div');
+  pomodoroWidget.id = 'focus-flow-pomodoro-widget';
+  pomodoroWidget.innerHTML = `
+    <style>
+      #focus-flow-pomodoro-widget {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+        border: 2px solid #2d3548;
+        border-radius: 16px;
+        padding: 12px 16px;
+        z-index: 2147483646;
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: move;
+        user-select: none;
+        animation: pomodoroSlideIn 0.3s ease-out;
+        min-width: 180px;
+      }
+      
+      @keyframes pomodoroSlideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      
+      #focus-flow-pomodoro-widget.work {
+        border-color: #00d4aa;
+      }
+      
+      #focus-flow-pomodoro-widget.short-break {
+        border-color: #0984e3;
+      }
+      
+      #focus-flow-pomodoro-widget.long-break {
+        border-color: #feca57;
+      }
+      
+      #focus-flow-pomodoro-widget.idle {
+        border-color: #5c6a7a;
+      }
+      
+      .pomodoro-widget-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        background: rgba(0, 212, 170, 0.15);
+        flex-shrink: 0;
+      }
+      
+      #focus-flow-pomodoro-widget.work .pomodoro-widget-icon {
+        background: rgba(0, 212, 170, 0.15);
+      }
+      
+      #focus-flow-pomodoro-widget.short-break .pomodoro-widget-icon {
+        background: rgba(9, 132, 227, 0.15);
+      }
+      
+      #focus-flow-pomodoro-widget.long-break .pomodoro-widget-icon {
+        background: rgba(254, 202, 87, 0.15);
+      }
+      
+      .pomodoro-widget-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+      }
+      
+      .pomodoro-widget-phase {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+      
+      #focus-flow-pomodoro-widget.work .pomodoro-widget-phase {
+        color: #00d4aa;
+      }
+      
+      #focus-flow-pomodoro-widget.short-break .pomodoro-widget-phase {
+        color: #0984e3;
+      }
+      
+      #focus-flow-pomodoro-widget.long-break .pomodoro-widget-phase {
+        color: #feca57;
+      }
+      
+      #focus-flow-pomodoro-widget.idle .pomodoro-widget-phase {
+        color: #8b99a8;
+      }
+      
+      .pomodoro-widget-time {
+        font-size: 22px;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+        color: #e7edf4;
+        line-height: 1;
+      }
+      
+      .pomodoro-widget-session {
+        font-size: 10px;
+        color: #5c6a7a;
+      }
+      
+      .pomodoro-widget-close {
+        background: none;
+        border: none;
+        color: #5c6a7a;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 14px;
+        line-height: 1;
+        transition: color 0.2s;
+        flex-shrink: 0;
+      }
+      
+      .pomodoro-widget-close:hover {
+        color: #e7edf4;
+      }
+    </style>
+    
+    <div class="pomodoro-widget-icon" id="pomodoro-widget-icon">🍅</div>
+    <div class="pomodoro-widget-info">
+      <span class="pomodoro-widget-phase" id="pomodoro-widget-phase"></span>
+      <span class="pomodoro-widget-time" id="pomodoro-widget-time"></span>
+      <span class="pomodoro-widget-session" id="pomodoro-widget-session"></span>
+    </div>
+    <button class="pomodoro-widget-close" id="pomodoro-widget-close" title="${hideLabel}">×</button>
+  `;
+  
+  document.body.appendChild(pomodoroWidget);
+  
+  // Close button
+  const closeBtn = pomodoroWidget.querySelector('#pomodoro-widget-close');
+  closeBtn?.addEventListener('click', () => {
+    pomodoroWidgetDismissed = true;
+    removePomodoroWidget();
+  });
+  
+  // Make draggable
+  makeDraggable(pomodoroWidget);
+  
+  // Initial update
+  updatePomodoroWidgetContent(state, settings);
+}
+
+// Update the Pomodoro widget content
+function updatePomodoroWidgetContent(state: PomodoroState, settings: PomodoroSettings) {
+  if (!pomodoroWidget) return;
+  
+  const phaseEl = pomodoroWidget.querySelector('#pomodoro-widget-phase') as HTMLElement;
+  const timeEl = pomodoroWidget.querySelector('#pomodoro-widget-time') as HTMLElement;
+  const sessionEl = pomodoroWidget.querySelector('#pomodoro-widget-session') as HTMLElement;
+  const iconEl = pomodoroWidget.querySelector('#pomodoro-widget-icon') as HTMLElement;
+  
+  if (!phaseEl || !timeEl || !sessionEl || !iconEl) return;
+  
+  // Update phase class
+  pomodoroWidget.classList.remove('work', 'short-break', 'long-break', 'idle');
+  pomodoroWidget.classList.add(state.phase);
+  
+  // Update phase text
+  let phaseText = '';
+  let icon = '🍅';
+  switch (state.phase) {
+    case 'work':
+      phaseText = t('pomodoro.focusTime');
+      icon = '🍅';
+      break;
+    case 'short-break':
+      phaseText = t('pomodoro.shortBreak');
+      icon = '☕';
+      break;
+    case 'long-break':
+      phaseText = t('pomodoro.longBreak');
+      icon = '🌴';
+      break;
+    case 'idle':
+      phaseText = t('pomodoro.readyToFocus');
+      icon = '🍅';
+      break;
+  }
+  
+  phaseEl.textContent = phaseText;
+  iconEl.textContent = icon;
+  
+  // Update time display
+  const displayTime = state.phase === 'idle' 
+    ? formatTime(settings.workDurationMinutes * 60)
+    : formatTime(state.timeRemainingSeconds);
+  timeEl.textContent = displayTime;
+  
+  // Update session count
+  sessionEl.textContent = `${t('pomodoro.session')} ${state.sessionsCompleted + 1}`;
+}
+
+// Remove the Pomodoro widget
+function removePomodoroWidget() {
+  if (pomodoroWidget) {
+    pomodoroWidget.remove();
+    pomodoroWidget = null;
+  }
+}
+
 // Show friction overlay
 function showFrictionOverlay() {
   if (document.getElementById('focus-flow-friction-overlay')) return;
@@ -390,6 +680,8 @@ function showFrictionOverlay() {
   const typePhraseLabel = t('frictionOverlay.typePhrase');
   const continueBtn = t('frictionOverlay.continue');
   const returnBtn = t('frictionOverlay.returnToSafety');
+  const explanation = t('frictionOverlay.explanation');
+  const openSettings = t('frictionOverlay.openSettings');
   
   const overlay = document.createElement('div');
   overlay.id = 'focus-flow-friction-overlay';
@@ -423,7 +715,34 @@ function showFrictionOverlay() {
         to { opacity: 1; transform: translateY(0); }
       }
       
-      .friction-icon { font-size: 64px; margin-bottom: 24px; }
+      .friction-icon { font-size: 64px; margin-top: 16px; margin-bottom: 16px; }
+      
+      .friction-explanation {
+        font-size: 15px;
+        color: #8b99a8;
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+      
+      .friction-settings-link {
+        font-size: 13px;
+        color: #00d4aa;
+        background: rgba(0, 212, 170, 0.1);
+        border: 1px solid rgba(0, 212, 170, 0.3);
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 24px;
+      }
+      
+      .friction-settings-link:hover {
+        background: rgba(0, 212, 170, 0.2);
+        border-color: rgba(0, 212, 170, 0.5);
+      }
       .friction-title { font-size: 28px; font-weight: 600; margin-bottom: 16px; color: #00d4aa; }
       .friction-message { font-size: 18px; color: #8b99a8; margin-bottom: 32px; line-height: 1.6; }
       .friction-timer { font-size: 48px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #00d4aa; margin-bottom: 24px; }
@@ -446,6 +765,14 @@ function showFrictionOverlay() {
     </style>
     
     <div class="friction-content">
+      <p class="friction-explanation">${explanation}</p>
+      <button class="friction-settings-link" id="friction-settings-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        ${openSettings}
+      </button>
       <div class="friction-icon">⏳</div>
       <h1 class="friction-title" id="friction-title">${waitTitle}</h1>
       <p class="friction-message" id="friction-message"></p>
@@ -471,6 +798,16 @@ function showFrictionOverlay() {
   // Append to body or documentElement
   const parent = document.body || document.documentElement;
   parent.appendChild(overlay);
+  
+  // Add settings button click handler
+  const settingsBtn = overlay.querySelector('#friction-settings-btn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      // Pass the current site so it can be highlighted in the options page
+      const currentSite = window.location.hostname;
+      chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS', payload: { tab: 'blocked', site: currentSite } });
+    });
+  }
   
   initFrictionLogic(overlay);
 }

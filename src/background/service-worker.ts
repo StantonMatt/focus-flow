@@ -249,6 +249,29 @@ async function handleMessage(message: Message): Promise<unknown> {
       return { success: true };
     }
     
+    case 'OPEN_OPTIONS': {
+      const payload = message.payload as { tab?: string; site?: string } | string | undefined;
+      let tab = '';
+      let site = '';
+      
+      if (typeof payload === 'string') {
+        tab = payload;
+      } else if (payload) {
+        tab = payload.tab || '';
+        site = payload.site || '';
+      }
+      
+      let optionsUrl = chrome.runtime.getURL('src/options/index.html');
+      if (tab || site) {
+        optionsUrl += '#' + tab;
+        if (site) {
+          optionsUrl += '?site=' + encodeURIComponent(site);
+        }
+      }
+      await chrome.tabs.create({ url: optionsUrl });
+      return { success: true };
+    }
+    
     case 'GET_TIME_STATS': {
       return await getTodayTimeStats();
     }
@@ -276,7 +299,12 @@ async function handleMessage(message: Message): Promise<unknown> {
     case 'FRICTION_COMPLETED': {
       const { domain } = message.payload as { domain: string };
       const settings = await getSettings();
-      await addBypass(domain, settings.friction.bypassDurationMinutes);
+      // If bypassLimited is false, use a very long duration (24 hours) 
+      // The bypass will be cleared when tab closes via CLEAR_BYPASS
+      const duration = settings.friction.bypassLimited 
+        ? settings.friction.bypassDurationMinutes 
+        : 24 * 60; // 24 hours for indefinite (cleared on tab close)
+      await addBypass(domain, duration);
       return { success: true };
     }
     
@@ -336,7 +364,7 @@ async function handlePomodoroAction(action: 'start' | 'pause' | 'reset' | 'skip'
     }
     
     case 'skip': {
-      // Skip to next phase
+      // Skip to next phase and auto-start it
       if (state.phase === 'work') {
         const isLongBreak = (state.sessionsCompleted + 1) % settings.pomodoro.sessionsUntilLongBreak === 0;
         newState = {
@@ -347,14 +375,14 @@ async function handlePomodoroAction(action: 'start' | 'pause' | 'reset' | 'skip'
             : settings.pomodoro.shortBreakMinutes * 60,
           sessionsCompleted: state.sessionsCompleted + 1,
           todayPomodoros: state.todayPomodoros + 1,
-          isRunning: false,
+          isRunning: true, // Auto-start next phase
         };
       } else {
         newState = {
           ...state,
           phase: 'work',
           timeRemainingSeconds: settings.pomodoro.workDurationMinutes * 60,
-          isRunning: false,
+          isRunning: true, // Auto-start next phase
         };
       }
       break;

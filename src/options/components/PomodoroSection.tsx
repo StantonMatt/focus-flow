@@ -1,4 +1,4 @@
-import type { PomodoroSettings } from '../../shared/types';
+import type { PomodoroSettings, PomodoroOverlayMode } from '../../shared/types';
 import { useTranslation } from '../../shared/i18n';
 
 interface Props {
@@ -146,6 +146,33 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
               onClick={() => handleChange('notificationsEnabled', !pomodoro.notificationsEnabled)}
             />
           </div>
+          
+          <div className="toggle-item overlay-mode-item">
+            <div className="toggle-info">
+              <div className="toggle-title">{t('pomodoroSettings.overlayMode')}</div>
+              <div className="toggle-desc">{t('pomodoroSettings.overlayModeDesc')}</div>
+            </div>
+            <div className="overlay-mode-options">
+              <button
+                className={`overlay-option ${pomodoro.overlayMode === 'never' ? 'active' : ''}`}
+                onClick={() => handleChange('overlayMode', 'never' as PomodoroOverlayMode)}
+              >
+                {t('pomodoroSettings.overlayNever')}
+              </button>
+              <button
+                className={`overlay-option ${pomodoro.overlayMode === 'whenActive' ? 'active' : ''}`}
+                onClick={() => handleChange('overlayMode', 'whenActive' as PomodoroOverlayMode)}
+              >
+                {t('pomodoroSettings.overlayWhenActive')}
+              </button>
+              <button
+                className={`overlay-option ${pomodoro.overlayMode === 'always' ? 'active' : ''}`}
+                onClick={() => handleChange('overlayMode', 'always' as PomodoroOverlayMode)}
+              >
+                {t('pomodoroSettings.overlayAlways')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -235,6 +262,39 @@ export default function PomodoroSection({ pomodoro, onUpdate }: Props) {
         .toggle-desc {
           font-size: 0.8125rem;
           color: var(--text-muted);
+        }
+        
+        .overlay-mode-item {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        
+        .overlay-mode-options {
+          display: flex;
+          gap: 8px;
+        }
+        
+        .overlay-option {
+          padding: 8px 16px;
+          font-size: 0.8125rem;
+          font-weight: 500;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: var(--border-radius-sm);
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        
+        .overlay-option:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+        }
+        
+        .overlay-option.active {
+          background: var(--accent-primary);
+          border-color: var(--accent-primary);
+          color: var(--bg-primary);
         }
       `}</style>
     </div>

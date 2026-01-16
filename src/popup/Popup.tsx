@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Settings, PomodoroState, DailyTimeStats } from '../shared/types';
+import type { Settings, PomodoroState, DailyTimeStats, PomodoroSettings } from '../shared/types';
 import { formatDuration } from '../shared/utils';
 import { useTranslation } from '../shared/i18n';
 import PomodoroTimer from './components/PomodoroTimer';
@@ -11,7 +11,7 @@ export default function Popup() {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [pomodoroState, setPomodoroState] = useState<PomodoroState | null>(null);
-  const [timeStats, setTimeStats] = useState<DailyTimeStats>({});
+  const [todayStats, setTodayStats] = useState<DailyTimeStats>({});
   const [activeTab, setActiveTab] = useState<Tab>('timer');
   const [loading, setLoading] = useState(true);
   
@@ -25,7 +25,7 @@ export default function Popup() {
       
       setSettings(settingsRes);
       setPomodoroState(pomodoroRes);
-      setTimeStats(statsRes || {});
+      setTodayStats(statsRes || {});
     } catch (err) {
       console.error('Failed to fetch data:', err);
     } finally {
@@ -60,6 +60,17 @@ export default function Popup() {
     setPomodoroState(newState);
   };
   
+  const handlePomodoroSettingsUpdate = async (pomodoroSettings: PomodoroSettings) => {
+    if (!settings) return;
+    
+    const newSettings = { ...settings, pomodoro: pomodoroSettings };
+    await chrome.runtime.sendMessage({ 
+      type: 'UPDATE_SETTINGS', 
+      payload: newSettings 
+    });
+    setSettings(newSettings);
+  };
+  
   const openOptions = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options/index.html') });
   };
@@ -72,7 +83,7 @@ export default function Popup() {
     );
   }
   
-  const totalTimeToday = Object.values(timeStats).reduce((a, b) => a + b, 0);
+  const totalTimeToday = Object.values(todayStats).reduce((a, b) => a + b, 0);
   
   return (
     <div className="popup">
@@ -122,11 +133,12 @@ export default function Popup() {
             state={pomodoroState}
             settings={settings.pomodoro}
             onAction={handlePomodoroAction}
+            onSettingsUpdate={handlePomodoroSettingsUpdate}
           />
         )}
         
         {activeTab === 'stats' && (
-          <TimeStats stats={timeStats} />
+          <TimeStats />
         )}
       </main>
       

@@ -51,13 +51,27 @@
     "breakCompleteBody": "Ready to get back to work?"
   },
   "stats": {
+    "title": "Time Statistics",
     "todaysActivity": "Today's Activity",
     "noActivityYet": "No activity yet",
     "startBrowsing": "Start browsing and your time will be tracked here.",
-    "weeklyOverview": "Weekly Overview",
-    "weeklyDesc": "Your browsing time over the past 7 days",
+    "weeklyOverview": "Time Statistics",
+    "weeklyDesc": "Track your browsing time across different periods",
     "noDataForDay": "No data for this day",
-    "browseToSee": "Browse some websites to see your time tracking data"
+    "browseToSee": "Browse some websites to see your time tracking data",
+    "periods": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "week": "Week",
+    "views": {
+      "sites": "Sites",
+      "categories": "Categories"
+    },
+    "categoryOther": "Other",
+    "yesterday": "Yesterday"
   },
   "blockedSites": {
     "title": "Blocked Sites",
@@ -76,18 +90,51 @@
     "site": "site",
     "sites": "sites",
     "noSitesInCategory": "No sites in this category yet",
+    "hiddenSites": "{count} default sites (hidden for privacy)",
     "addSiteToCategory": "Add site to this category",
     "categoryNamePlaceholder": "Category name",
     "createCategory": "Create",
-    "newCategory": "Create New Category"
+    "newCategory": "Create New Category",
+    "hidden": "Hidden",
+    "clickToReveal": "Click to reveal"
   },
   "categories": {
     "socialMedia": "Social Media",
     "videoStreaming": "Video Streaming",
     "newsMedia": "News & Media",
     "gaming": "Gaming",
+    "searchEngines": "Search Engines",
+    "ai": "AI",
     "adultContent": "Adult Content",
     "custom": "My Sites"
+  },
+  "statsCategories": {
+    "socialMedia": "Social Media",
+    "videoStreaming": "Video & Streaming",
+    "musicAudio": "Music & Audio",
+    "newsMedia": "News & Media",
+    "gaming": "Gaming",
+    "searchEngines": "Search Engines",
+    "aiTools": "AI Tools",
+    "shopping": "Shopping",
+    "email": "Email",
+    "productivity": "Productivity",
+    "development": "Development",
+    "education": "Education",
+    "finance": "Finance & Banking",
+    "communication": "Communication",
+    "reference": "Reference",
+    "forumsCommunities": "Forums & Communities",
+    "sports": "Sports",
+    "healthFitness": "Health & Fitness",
+    "travel": "Travel",
+    "foodRecipes": "Food & Recipes",
+    "cloudStorage": "Cloud Storage",
+    "design": "Design",
+    "entertainment": "Entertainment",
+    "jobsCareers": "Jobs & Careers",
+    "realEstate": "Real Estate",
+    "government": "Government"
   },
   "contentFilters": {
     "title": "Content Filters",
@@ -138,7 +185,13 @@
     "noSchedulesDesc": "Without schedules, blocking is always active. Add a schedule to limit blocking to specific times.",
     "everyDay": "Every day",
     "weekdays": "Weekdays",
-    "weekends": "Weekends"
+    "weekends": "Weekends",
+    "defaults": {
+      "workHours": "Work Hours",
+      "fullDayFocus": "Full Day Focus",
+      "studyTime": "Study Time",
+      "eveningWindDown": "Evening Wind Down"
+    }
   },
   "friction": {
     "title": "Friction",
@@ -148,13 +201,22 @@
     "previewWait": "Wait {seconds} seconds",
     "previewType": "Type: \"{phrase}\"",
     "previewAccess": "Access granted for {minutes} minutes",
-    "delayDuration": "Delay Duration (seconds)",
+    "previewAccessGranted": "Access Granted",
+    "previewReset": "Try Again",
+    "previewReady": "Ready!",
+    "previewClickContinue": "Click \"Continue to Site\" to proceed",
+    "previewTypePlaceholder": "Type the phrase here...",
+    "previewStayedFocused": "Good choice! Stayed focused.",
+    "previewProcrastinating": "You gave in to distraction!",
+    "delayDuration": "Delay Duration",
     "requirePhrase": "Require typing a phrase",
     "phraseToType": "Phrase to Type",
     "phrasePlaceholder": "e.g., I want to procrastinate",
     "phraseHint": "Users must type this phrase exactly to access the site",
-    "bypassDuration": "Bypass Duration (minutes)",
-    "bypassHint": "After completing friction, access is granted for this duration"
+    "limitBypass": "Limit bypass duration",
+    "bypassLimitedHint": "After completing friction, access is granted for {minutes} minutes",
+    "bypassUnlimitedHint": "After completing friction, access is granted until tab closes",
+    "bypassDuration": "Bypass Duration"
   },
   "pomodoroSettings": {
     "tabTitle": "Pomodoro",
@@ -172,7 +234,12 @@
     "blockDuringWork": "Block during work sessions",
     "blockDuringWorkDesc": "Enable strict blocking during focus time",
     "notifications": "Desktop notifications",
-    "notificationsDesc": "Show notifications when sessions end"
+    "notificationsDesc": "Show notifications when sessions end",
+    "overlayMode": "Timer Overlay",
+    "overlayModeDesc": "Show a floating timer on web pages",
+    "overlayNever": "Never",
+    "overlayWhenActive": "When timer is active",
+    "overlayAlways": "Always"
   },
   "blocked": {
     "stayFocused": "Stay Focused",
@@ -190,7 +257,9 @@
     "almostThere": "Almost there...",
     "typePhrase": "Type this phrase to continue:",
     "continue": "Continue to Site",
-    "returnToSafety": "Return to Safety"
+    "returnToSafety": "Return to Safety",
+    "explanation": "This site is in your friction list to help you stay focused.",
+    "openSettings": "Manage blocked sites"
   },
   "timeLimitWidget": {
     "timeRemaining": "Time remaining",
