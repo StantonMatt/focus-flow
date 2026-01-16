@@ -734,37 +734,55 @@ function startMediaMonitoring() {
   stopMediaMonitoring();
   
   // Pause immediately
-  pauseAllMedia();
+  try {
+    pauseAllMedia();
+  } catch (e) {
+    // Ignore errors during initial pause
+  }
   
   // Keep checking every 100ms for new or restarted media
   mediaMonitorInterval = window.setInterval(() => {
-    pauseAllMedia();
+    try {
+      pauseAllMedia();
+    } catch (e) {
+      // Ignore errors
+    }
   }, 100);
   
-  // Also watch for new elements being added to the DOM
-  mediaObserver = new MutationObserver((mutations) => {
-    let shouldPause = false;
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (node instanceof HTMLElement) {
-          if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO' || 
-              node.querySelector('video, audio')) {
-            shouldPause = true;
-            break;
+  // Also watch for new elements being added to the DOM (only if body exists)
+  if (document.body) {
+    try {
+      mediaObserver = new MutationObserver((mutations) => {
+        let shouldPause = false;
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof HTMLElement) {
+              if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO' || 
+                  node.querySelector('video, audio')) {
+                shouldPause = true;
+                break;
+              }
+            }
+          }
+          if (shouldPause) break;
+        }
+        if (shouldPause) {
+          try {
+            pauseAllMedia();
+          } catch (e) {
+            // Ignore errors
           }
         }
-      }
-      if (shouldPause) break;
+      });
+      
+      mediaObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    } catch (e) {
+      // Ignore if we can't set up the observer
     }
-    if (shouldPause) {
-      pauseAllMedia();
-    }
-  });
-  
-  mediaObserver.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  }
 }
 
 // Stop media monitoring when friction overlay is removed
