@@ -675,6 +675,10 @@ function removePomodoroWidget() {
   }
 }
 
+// Media monitoring state
+let mediaMonitorInterval: number | null = null;
+let mediaObserver: MutationObserver | null = null;
+
 // Pause all media on the page (videos and audio)
 function pauseAllMedia() {
   // Pause all video elements
@@ -682,8 +686,14 @@ function pauseAllMedia() {
     try {
       video.pause();
       video.muted = true;
+      // Remove autoplay to prevent restart
+      video.autoplay = false;
+      // Clear the source temporarily to force stop (for stubborn players)
+      if (video.src && !video.dataset.focusFlowPaused) {
+        video.dataset.focusFlowPaused = 'true';
+      }
     } catch (e) {
-      // Ignore errors for cross-origin iframes
+      // Ignore errors
     }
   });
   
@@ -692,6 +702,7 @@ function pauseAllMedia() {
     try {
       audio.pause();
       audio.muted = true;
+      audio.autoplay = false;
     } catch (e) {
       // Ignore errors
     }
@@ -717,12 +728,63 @@ function pauseAllMedia() {
   });
 }
 
+// Start continuous media monitoring while friction overlay is active
+function startMediaMonitoring() {
+  // Clear any existing monitoring
+  stopMediaMonitoring();
+  
+  // Pause immediately
+  pauseAllMedia();
+  
+  // Keep checking every 100ms for new or restarted media
+  mediaMonitorInterval = window.setInterval(() => {
+    pauseAllMedia();
+  }, 100);
+  
+  // Also watch for new elements being added to the DOM
+  mediaObserver = new MutationObserver((mutations) => {
+    let shouldPause = false;
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node instanceof HTMLElement) {
+          if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO' || 
+              node.querySelector('video, audio')) {
+            shouldPause = true;
+            break;
+          }
+        }
+      }
+      if (shouldPause) break;
+    }
+    if (shouldPause) {
+      pauseAllMedia();
+    }
+  });
+  
+  mediaObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+
+// Stop media monitoring when friction overlay is removed
+function stopMediaMonitoring() {
+  if (mediaMonitorInterval) {
+    clearInterval(mediaMonitorInterval);
+    mediaMonitorInterval = null;
+  }
+  if (mediaObserver) {
+    mediaObserver.disconnect();
+    mediaObserver = null;
+  }
+}
+
 // Show friction overlay
 function showFrictionOverlay() {
   if (document.getElementById('focus-flow-friction-overlay')) return;
   
-  // Pause any playing media to prevent background audio/video
-  pauseAllMedia();
+  // Start continuous media monitoring to prevent background audio/video
+  startMediaMonitoring();
   
   const waitTitle = t('frictionOverlay.wait');
   const typePhraseLabel = t('frictionOverlay.typePhrase');
@@ -927,6 +989,7 @@ async function initFrictionLogic(overlay: HTMLElement) {
   }
   
   goBackBtn.addEventListener('click', () => {
+    stopMediaMonitoring();
     window.history.back();
   });
   
@@ -946,6 +1009,7 @@ async function initFrictionLogic(overlay: HTMLElement) {
     
     isFrictionActive = false;
     bypassedDomain = domain; // Track that we bypassed friction for this domain
+    stopMediaMonitoring();
     overlay.remove();
     
     // Now initialize content filters if needed
