@@ -200,6 +200,9 @@ async function checkAndBlock() {
 function showBlockedPage(message?: string) {
   if (!isExtensionValid()) return;
   
+  // Pause any playing media before redirecting
+  pauseAllMedia();
+  
   try {
     const blockedUrl = chrome.runtime.getURL('src/blocked/index.html');
     const currentUrl = encodeURIComponent(window.location.href);
@@ -672,9 +675,54 @@ function removePomodoroWidget() {
   }
 }
 
+// Pause all media on the page (videos and audio)
+function pauseAllMedia() {
+  // Pause all video elements
+  document.querySelectorAll('video').forEach(video => {
+    try {
+      video.pause();
+      video.muted = true;
+    } catch (e) {
+      // Ignore errors for cross-origin iframes
+    }
+  });
+  
+  // Pause all audio elements
+  document.querySelectorAll('audio').forEach(audio => {
+    try {
+      audio.pause();
+      audio.muted = true;
+    } catch (e) {
+      // Ignore errors
+    }
+  });
+  
+  // Also try to pause media in iframes (same-origin only)
+  document.querySelectorAll('iframe').forEach(iframe => {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.querySelectorAll('video').forEach((video) => {
+          (video as HTMLVideoElement).pause();
+          (video as HTMLVideoElement).muted = true;
+        });
+        iframeDoc.querySelectorAll('audio').forEach((audio) => {
+          (audio as HTMLAudioElement).pause();
+          (audio as HTMLAudioElement).muted = true;
+        });
+      }
+    } catch (e) {
+      // Cross-origin iframe, can't access
+    }
+  });
+}
+
 // Show friction overlay
 function showFrictionOverlay() {
   if (document.getElementById('focus-flow-friction-overlay')) return;
+  
+  // Pause any playing media to prevent background audio/video
+  pauseAllMedia();
   
   const waitTitle = t('frictionOverlay.wait');
   const typePhraseLabel = t('frictionOverlay.typePhrase');
