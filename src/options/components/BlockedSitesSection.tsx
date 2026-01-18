@@ -399,7 +399,7 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                             className="btn-link"
                             onClick={() => toggleAllSitesInCategory(category.id, !allEnabled)}
                           >
-                            {allEnabled ? t('common.disable') : t('common.enable')} all
+                            {allEnabled ? t('blockedSites.disableAll') : t('blockedSites.enableAll')}
                           </button>
                         </div>
                       );
@@ -414,7 +414,7 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                           </svg>
-                          {category.sites.filter(s => s.hidden).length} default sites are automatically blocked when this category is enabled.
+                          {t('blockedSites.defaultSitesProtected')}
                         </p>
                       ) : (
                         <p>{t('blockedSites.noSitesInCategory')}</p>

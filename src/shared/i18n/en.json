@@ -96,7 +96,10 @@
     "createCategory": "Create",
     "newCategory": "Create New Category",
     "hidden": "Hidden",
-    "clickToReveal": "Click to reveal"
+    "clickToReveal": "Click to reveal",
+    "enableAll": "Enable all",
+    "disableAll": "Disable all",
+    "defaultSitesProtected": "Default sites are automatically blocked when this category is enabled."
   },
   "categories": {
     "socialMedia": "Social Media",

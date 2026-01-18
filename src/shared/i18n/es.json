@@ -96,7 +96,10 @@
     "createCategory": "Crear",
     "newCategory": "Crear Nueva Categoría",
     "hidden": "Oculto",
-    "clickToReveal": "Clic para revelar"
+    "clickToReveal": "Clic para revelar",
+    "enableAll": "Activar todos",
+    "disableAll": "Desactivar todos",
+    "defaultSitesProtected": "Los sitios predeterminados se bloquean automáticamente cuando esta categoría está habilitada."
   },
   "categories": {
     "socialMedia": "Redes Sociales",

@@ -96,7 +96,10 @@
     "createCategory": "创建",
     "newCategory": "创建新分类",
     "hidden": "隐藏",
-    "clickToReveal": "点击显示"
+    "clickToReveal": "点击显示",
+    "enableAll": "全部启用",
+    "disableAll": "全部禁用",
+    "defaultSitesProtected": "启用此分类后，默认网站将自动被拦截。"
   },
   "categories": {
     "socialMedia": "社交媒体",
