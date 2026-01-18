@@ -332,6 +332,14 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                     {(() => {
                       // Only count visible (non-hidden) sites
                       const visibleSites = category.sites.filter(s => !s.hidden);
+                      const hiddenSites = category.sites.filter(s => s.hidden);
+                      
+                      // For adult content or categories with hidden sites, show special count
+                      if (hiddenSites.length > 0 && visibleSites.length === 0) {
+                        return `${hiddenSites.length}+ ${t('blockedSites.sites')} (protected)`;
+                      } else if (hiddenSites.length > 0) {
+                        return `${visibleSites.length} + ${hiddenSites.length} protected`;
+                      }
                       return `${visibleSites.length} ${visibleSites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
                     })()}
                   </div>
@@ -371,12 +379,14 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                       const allEnabled = areAllVisibleSitesEnabled(category);
                       return (
                         <div className="toggle-all-row">
+                          <span className="toggle-all-label">
+                            {allEnabled ? t('common.disable') : t('common.enable')} all {visibleSites.length} {t('blockedSites.sites')}
+                          </span>
                           <button
-                            className="btn-toggle-all"
+                            className={`toggle toggle-sm ${allEnabled ? 'active' : ''}`}
                             onClick={() => toggleAllSitesInCategory(category.id, !allEnabled)}
-                          >
-                            {allEnabled ? t('common.disable') : t('common.enable')} {t('blockedSites.sites')} ({visibleSites.length})
-                          </button>
+                            title={allEnabled ? t('common.disable') : t('common.enable')}
+                          />
                         </div>
                       );
                     }
@@ -385,7 +395,16 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                   {/* Show empty state if no visible sites */}
                   {category.sites.filter(s => !s.hidden).length === 0 ? (
                     <div className="category-empty">
-                      <p>{t('blockedSites.noSitesInCategory')}</p>
+                      {category.sites.filter(s => s.hidden).length > 0 ? (
+                        <p className="protected-sites-notice">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                          </svg>
+                          {category.sites.filter(s => s.hidden).length} default sites are automatically blocked when this category is enabled.
+                        </p>
+                      ) : (
+                        <p>{t('blockedSites.noSitesInCategory')}</p>
+                      )}
                     </div>
                   ) : (
                     category.sites.filter(site => !site.hidden).map((site) => (
