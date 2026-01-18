@@ -99,7 +99,7 @@
     "clickToReveal": "点击显示",
     "enableAll": "全部启用",
     "disableAll": "全部禁用",
-    "defaultSitesProtected": "启用此分类后，默认网站将自动被拦截。",
+    "defaultSitesProtected": "默认网站始终隐藏。启用此分类后将被拦截。",
     "blockedSites": "已拦截",
     "protected": "受保护"
   },

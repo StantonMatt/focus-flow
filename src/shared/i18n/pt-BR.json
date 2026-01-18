@@ -99,7 +99,7 @@
     "clickToReveal": "Clique para revelar",
     "enableAll": "Ativar todos",
     "disableAll": "Desativar todos",
-    "defaultSitesProtected": "Sites padrão são bloqueados automaticamente quando esta categoria está ativada.",
+    "defaultSitesProtected": "Sites padrão estão sempre ocultos. Eles são bloqueados quando esta categoria está ativada.",
     "blockedSites": "Sites bloqueados",
     "protected": "Protegidos"
   },

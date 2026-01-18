@@ -99,7 +99,7 @@
     "clickToReveal": "Click to reveal",
     "enableAll": "Enable all",
     "disableAll": "Disable all",
-    "defaultSitesProtected": "Default sites are automatically blocked when this category is enabled.",
+    "defaultSitesProtected": "Default sites are always hidden. They are blocked when this category is enabled.",
     "blockedSites": "Blocked sites",
     "protected": "Protected"
   },
