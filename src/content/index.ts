@@ -1,6 +1,6 @@
 import type { CheckBlockedResponse, Message, Settings, PomodoroState, PomodoroSettings } from '../shared/types';
 import { extractDomain, formatDuration, formatTime } from '../shared/utils';
-import { HEARTBEAT_INTERVAL } from '../shared/constants';
+import { HEARTBEAT_INTERVAL, IDLE_TIMEOUT } from '../shared/constants';
 import { getTranslator } from '../shared/i18n';
 import { initFilters } from './filters';
 
@@ -1041,11 +1041,107 @@ async function initFrictionLogic(overlay: HTMLElement) {
   }
 }
 
-// Time tracking
+// Time tracking with idle detection
+let lastActivityTime = Date.now();
+let activityListenersAdded = false;
+
+// Update last activity time on user interaction
+function handleUserActivity() {
+  lastActivityTime = Date.now();
+}
+
+// Check if any media (video/audio) is actively playing
+function isMediaPlaying(): boolean {
+  // Check all video elements
+  const videos = document.querySelectorAll('video');
+  for (const video of videos) {
+    if (!video.paused && !video.ended && video.currentTime > 0) {
+      return true;
+    }
+  }
+  
+  // Check all audio elements
+  const audios = document.querySelectorAll('audio');
+  for (const audio of audios) {
+    if (!audio.paused && !audio.ended && audio.currentTime > 0) {
+      return true;
+    }
+  }
+  
+  // Also check iframes (same-origin only)
+  try {
+    const iframes = document.querySelectorAll('iframe');
+    for (const iframe of iframes) {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        const iframeVideos = iframeDoc.querySelectorAll('video');
+        for (const video of iframeVideos) {
+          if (!video.paused && !video.ended && video.currentTime > 0) {
+            return true;
+          }
+        }
+        const iframeAudios = iframeDoc.querySelectorAll('audio');
+        for (const audio of iframeAudios) {
+          if (!audio.paused && !audio.ended && audio.currentTime > 0) {
+            return true;
+          }
+        }
+      }
+    }
+  } catch {
+    // Cross-origin iframe, can't access
+  }
+  
+  return false;
+}
+
+// Check if user is considered idle
+function isUserIdle(): boolean {
+  const timeSinceActivity = Date.now() - lastActivityTime;
+  return timeSinceActivity > IDLE_TIMEOUT;
+}
+
+// Add activity event listeners (only once)
+function setupActivityTracking() {
+  if (activityListenersAdded) return;
+  activityListenersAdded = true;
+  
+  // Track various user interactions
+  const activityEvents = [
+    'mousedown',
+    'mousemove',
+    'keydown',
+    'scroll',
+    'touchstart',
+    'wheel',
+    'click'
+  ];
+  
+  // Use passive listeners for better performance
+  const options = { passive: true, capture: true };
+  
+  activityEvents.forEach(event => {
+    document.addEventListener(event, handleUserActivity, options);
+  });
+  
+  // Also reset activity when page becomes visible (user switched back to tab)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      handleUserActivity();
+    }
+  });
+}
+
 function startTimeTracking() {
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval);
   }
+  
+  // Set up activity tracking listeners
+  setupActivityTracking();
+  
+  // Initialize last activity time
+  lastActivityTime = Date.now();
   
   heartbeatInterval = window.setInterval(() => {
     if (!isExtensionValid()) {
@@ -1069,6 +1165,18 @@ function sendHeartbeat() {
   const domain = extractDomain(window.location.href);
   if (!domain) return;
   
+  // Don't count time if user is idle AND no media is playing
+  // This prevents counting time when:
+  // - User walks away from computer
+  // - Screensaver is active
+  // - Tab is left open but unused
+  // BUT still counts time if:
+  // - User is watching a video
+  // - User is listening to audio/music
+  if (isUserIdle() && !isMediaPlaying()) {
+    return;
+  }
+  
   sendMessage({
     type: 'HEARTBEAT',
     payload: { 
@@ -1082,7 +1190,8 @@ function handleVisibilityChange() {
   // Re-check blocking status when tab becomes visible again
   // (in case settings changed while tab was hidden)
   if (document.visibilityState === 'visible' && !isBlocked && !isFrictionActive) {
-    // Could add re-check logic here if needed
+    // Reset activity time when user switches back to this tab
+    handleUserActivity();
   }
 }
 

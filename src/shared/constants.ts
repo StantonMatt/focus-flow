@@ -376,6 +376,9 @@ export const STORAGE_KEYS = {
 // Heartbeat interval in milliseconds (5 seconds)
 export const HEARTBEAT_INTERVAL = 5000;
 
+// Idle timeout in milliseconds (5 minutes) - stop counting time after this duration of inactivity
+export const IDLE_TIMEOUT = 5 * 60 * 1000;
+
 // Alarm names
 export const ALARMS = {
   POMODORO_TICK: 'pomodoro-tick',
