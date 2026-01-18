@@ -40,7 +40,6 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryIcon, setNewCategoryIcon] = useState('📁');
-  const [revealedSites, setRevealedSites] = useState<Set<string>>(new Set());
   const [highlightedSiteId, setHighlightedSiteId] = useState<string | null>(null);
   
   // FLIP animation refs
@@ -53,18 +52,14 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
   useEffect(() => {
     if (!highlightSite) return;
     
-    // Find the site and its category
+    // Find the site and its category (only visible/non-hidden sites)
     for (const category of categories) {
       const site = category.sites.find(s => 
-        highlightSite.includes(s.pattern) || s.pattern.includes(highlightSite)
+        !s.hidden && (highlightSite.includes(s.pattern) || s.pattern.includes(highlightSite))
       );
       if (site) {
         // Expand the category
         setExpandedCategories(prev => new Set([...prev, category.id]));
-        // If it's hidden, reveal it
-        if (site.hidden) {
-          setRevealedSites(prev => new Set([...prev, site.id]));
-        }
         // Set the highlighted site
         setHighlightedSiteId(site.id);
         
@@ -180,6 +175,22 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
     ));
   };
   
+  // Toggle all sites in a category on or off
+  const toggleAllSitesInCategory = (categoryId: string, enable: boolean) => {
+    onUpdate(categories.map(cat => 
+      cat.id === categoryId 
+        ? { ...cat, sites: cat.sites.map(s => ({ ...s, enabled: enable })) }
+        : cat
+    ));
+  };
+  
+  // Check if all visible sites in a category are enabled
+  const areAllVisibleSitesEnabled = (category: SiteCategory): boolean => {
+    const visibleSites = category.sites.filter(s => !s.hidden);
+    if (visibleSites.length === 0) return false;
+    return visibleSites.every(s => s.enabled);
+  };
+  
   // Update site mode
   const updateSiteMode = (categoryId: string, siteId: string, mode: BlockMode) => {
     onUpdate(categories.map(cat => 
@@ -290,31 +301,7 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
     return category.name;
   };
   
-  // Count total enabled sites
-  const getTotalEnabledSites = (): number => {
-    return categories.reduce((total, cat) => {
-      if (!cat.enabled) return total;
-      return total + cat.sites.filter(s => s.enabled).length;
-    }, 0);
-  };
-  
   const emojiOptions = ['📱', '📺', '📰', '🎮', '🔞', '💼', '🎵', '🛒', '📧', '⭐', '📁', '🚫'];
-  
-  // Toggle reveal for hidden adult content sites
-  const toggleRevealSite = (siteId: string) => {
-    const newRevealed = new Set(revealedSites);
-    if (newRevealed.has(siteId)) {
-      newRevealed.delete(siteId);
-    } else {
-      newRevealed.add(siteId);
-    }
-    setRevealedSites(newRevealed);
-  };
-  
-  // Check if a site should show as hidden (hidden prop set and not revealed)
-  const isSiteHidden = (site: BlockedSite): boolean => {
-    return site.hidden === true && !revealedSites.has(site.id);
-  };
   
   return (
     <div>
@@ -322,9 +309,6 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
         <div className="settings-section-header">
           <div>
             <h2 className="settings-section-title">{t('blockedSites.title')}</h2>
-            <p className="settings-section-desc">
-              {t('blockedSites.categoriesDesc', { count: getTotalEnabledSites() })}
-            </p>
           </div>
         </div>
         
@@ -346,8 +330,9 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                   <div className="category-name">{getCategoryName(category)}</div>
                   <div className="category-count">
                     {(() => {
-                      const totalForBlocking = category.sites.length;
-                      return `${totalForBlocking} ${totalForBlocking === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
+                      // Only count visible (non-hidden) sites
+                      const visibleSites = category.sites.filter(s => !s.hidden);
+                      return `${visibleSites.length} ${visibleSites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
                     })()}
                   </div>
                 </div>
@@ -379,67 +364,40 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
               {/* Category Sites (expandable) */}
               {expandedCategories.has(category.id) && (
                 <div className="category-sites">
-                  {category.sites.length === 0 ? (
+                  {/* Toggle All Sites button - only show if there are visible sites */}
+                  {(() => {
+                    const visibleSites = category.sites.filter(s => !s.hidden);
+                    if (visibleSites.length > 0) {
+                      const allEnabled = areAllVisibleSitesEnabled(category);
+                      return (
+                        <div className="toggle-all-row">
+                          <button
+                            className="btn-toggle-all"
+                            onClick={() => toggleAllSitesInCategory(category.id, !allEnabled)}
+                          >
+                            {allEnabled ? t('common.disable') : t('common.enable')} {t('blockedSites.sites')} ({visibleSites.length})
+                          </button>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  {/* Show empty state if no visible sites */}
+                  {category.sites.filter(s => !s.hidden).length === 0 ? (
                     <div className="category-empty">
                       <p>{t('blockedSites.noSitesInCategory')}</p>
                     </div>
                   ) : (
-                    category.sites.map((site) => {
-                      const isHidden = isSiteHidden(site);
-                      
-                      // If site is hidden (adult content), show a masked row
-                      if (isHidden) {
-                        return (
-                          <div 
-                            key={site.id} 
-                            className={`site-item site-hidden ${site.enabled ? '' : 'disabled'}`}
-                            onClick={() => toggleRevealSite(site.id)}
-                            title={t('blockedSites.clickToReveal')}
-                          >
-                            <div className="site-hidden-icon">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                                <line x1="1" y1="1" x2="23" y2="23" />
-                              </svg>
-                            </div>
-                            <div className="site-info">
-                              <span className="site-pattern site-pattern-hidden">{t('blockedSites.hidden')}</span>
-                              <span className="site-reveal-hint">{t('blockedSites.clickToReveal')}</span>
-                            </div>
-                            <div className="site-actions">
-                              <button
-                                className={`toggle toggle-sm ${site.enabled ? 'active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); toggleSite(category.id, site.id); }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      }
-                      
-                      // Normal visible site or revealed hidden site
-                      return (
-                        <div 
-                          key={site.id} 
-                          ref={(el) => {
-                            if (el) siteRefs.current.set(site.id, el);
-                            else siteRefs.current.delete(site.id);
-                          }}
-                          className={`site-item ${site.enabled ? '' : 'disabled'} ${site.hidden ? 'site-revealed' : ''} ${highlightedSiteId === site.id ? 'highlighted' : ''}`}
-                        >
-                          {site.hidden ? (
-                            <div 
-                              className="site-revealed-icon"
-                              onClick={() => toggleRevealSite(site.id)}
-                              title={t('blockedSites.clickToReveal')}
-                            >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                <circle cx="12" cy="12" r="3" />
-                              </svg>
-                            </div>
-                          ) : (
-                            <SiteIcon domain={site.pattern} />
-                          )}
+                    category.sites.filter(site => !site.hidden).map((site) => (
+                      <div 
+                        key={site.id} 
+                        ref={(el) => {
+                          if (el) siteRefs.current.set(site.id, el);
+                          else siteRefs.current.delete(site.id);
+                        }}
+                        className={`site-item ${site.enabled ? '' : 'disabled'} ${highlightedSiteId === site.id ? 'highlighted' : ''}`}
+                      >
+                        <SiteIcon domain={site.pattern} />
                           <div className="site-info">
                             <span className="site-pattern">{site.pattern}</span>
                             <span 
@@ -510,8 +468,7 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                             </div>
                           )}
                         </div>
-                      );
-                    })
+                    ))
                   )}
                   
                   {/* Add site form */}
