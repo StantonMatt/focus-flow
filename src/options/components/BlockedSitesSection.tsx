@@ -333,14 +333,30 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                       // Only count visible (non-hidden) sites
                       const visibleSites = category.sites.filter(s => !s.hidden);
                       const hiddenSites = category.sites.filter(s => s.hidden);
+                      const countText = `${visibleSites.length} ${visibleSites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
                       
-                      // For adult content or categories with hidden sites, show special count
-                      if (hiddenSites.length > 0 && visibleSites.length === 0) {
-                        return `${hiddenSites.length}+ ${t('blockedSites.sites')} (protected)`;
-                      } else if (hiddenSites.length > 0) {
-                        return `${visibleSites.length} + ${hiddenSites.length} protected`;
+                      // If there are hidden default sites, show a shield icon indicator
+                      if (hiddenSites.length > 0) {
+                        return (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {countText}
+                            <span title="Default sites protected" style={{ display: 'flex' }}>
+                              <svg 
+                                width="14" 
+                                height="14" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="var(--accent-primary)" 
+                                strokeWidth="2"
+                                style={{ opacity: 0.8 }}
+                              >
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                              </svg>
+                            </span>
+                          </span>
+                        );
                       }
-                      return `${visibleSites.length} ${visibleSites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
+                      return countText;
                     })()}
                   </div>
                 </div>
@@ -372,21 +388,19 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
               {/* Category Sites (expandable) */}
               {expandedCategories.has(category.id) && (
                 <div className="category-sites">
-                  {/* Toggle All Sites button - only show if there are visible sites */}
+                  {/* Toggle All Sites - simple link at top */}
                   {(() => {
                     const visibleSites = category.sites.filter(s => !s.hidden);
-                    if (visibleSites.length > 0) {
+                    if (visibleSites.length > 1) {
                       const allEnabled = areAllVisibleSitesEnabled(category);
                       return (
-                        <div className="toggle-all-row">
-                          <span className="toggle-all-label">
-                            {allEnabled ? t('common.disable') : t('common.enable')} all {visibleSites.length} {t('blockedSites.sites')}
-                          </span>
+                        <div className="toggle-all-link">
                           <button
-                            className={`toggle toggle-sm ${allEnabled ? 'active' : ''}`}
+                            className="btn-link"
                             onClick={() => toggleAllSitesInCategory(category.id, !allEnabled)}
-                            title={allEnabled ? t('common.disable') : t('common.enable')}
-                          />
+                          >
+                            {allEnabled ? t('common.disable') : t('common.enable')} all
+                          </button>
                         </div>
                       );
                     }
