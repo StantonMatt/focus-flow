@@ -330,33 +330,36 @@ export default function BlockedSitesSection({ categories, onUpdate, highlightSit
                   <div className="category-name">{getCategoryName(category)}</div>
                   <div className="category-count">
                     {(() => {
-                      // Only count visible (non-hidden) sites
                       const visibleSites = category.sites.filter(s => !s.hidden);
                       const hiddenSites = category.sites.filter(s => s.hidden);
-                      const countText = `${visibleSites.length} ${visibleSites.length === 1 ? t('blockedSites.site') : t('blockedSites.sites')}`;
+                      const enabledVisibleCount = visibleSites.filter(s => s.enabled).length;
                       
-                      // If there are hidden default sites, show a shield icon indicator
+                      // For adult content category with hidden default sites
                       if (hiddenSites.length > 0) {
                         return (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {countText}
-                            <span title="Default sites protected" style={{ display: 'flex' }}>
-                              <svg 
-                                width="14" 
-                                height="14" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="var(--accent-primary)" 
-                                strokeWidth="2"
-                                style={{ opacity: 0.8 }}
-                              >
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                              </svg>
-                            </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{t('blockedSites.blockedSites')}:</span>
+                            <svg 
+                              width="14" 
+                              height="14" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="var(--accent-primary)" 
+                              strokeWidth="2"
+                              style={{ marginLeft: '2px' }}
+                            >
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            <span>{t('blockedSites.protected')}</span>
+                            {enabledVisibleCount > 0 && (
+                              <span>+ {enabledVisibleCount}</span>
+                            )}
                           </span>
                         );
                       }
-                      return countText;
+                      
+                      // Regular categories - show enabled count
+                      return `${t('blockedSites.blockedSites')}: ${enabledVisibleCount}`;
                     })()}
                   </div>
                 </div>
